@@ -1,0 +1,6 @@
+@Mahat.Server_HostAddress = http://localhost:5283
+
+GET {{Mahat.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
