@@ -19,7 +19,7 @@
 
 <script>
 import Navbar from "../components/Navbar.vue";
-import { getTableInfo } from "@/api/DBApi";
+import { tableData } from "@/api/DBApi";
 export default {
   components: {
     Navbar,
@@ -40,25 +40,25 @@ export default {
       tableHeaders: [],
     };
   },
-  methods: {
-    async getTablesInfo() {
-      try {
-        const instanceName = this.$globals.instanceName;
-        const respponse = await getTableInfo(this.databaseName, this.tableName, instanceName);
+    methods: {
+      async getTablesInfo() {
+        try {
+          const instanceName = this.$cookies.get('selectedInstance')
+          const response = await tableData(this.databaseName, this.tableName, instanceName);
 
-        console.log(response.data);
-        this.tableData = response.data;
-        if (this.tableData.length > 0) {
-          this.tableHeaders = Object.keys(this.tableData[0]);
+          console.log(response.data);
+          this.tableData = response.data;
+          if (this.tableData.length > 0) {
+            this.tableHeaders = Object.keys(this.tableData[0]);
+          }
+        } catch (error) {
+          console.error("There was an error!", error);
         }
-      } catch (error) {
-        console.error("There was an error!", error);
-      }
+      },
     },
     mounted() {
       this.getTablesInfo();
     },
-  },
 };
 </script>
 <style></style>

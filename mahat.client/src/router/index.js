@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue';
 import Login from "../views/Login.vue";
-import Callback from '../views/Callback.vue';
 import DBview from '../views/DBview.vue';
 import TablesView from '../views/TablesView.vue';
 import Table from "../views/Table.vue";
@@ -30,7 +29,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes
 });
 

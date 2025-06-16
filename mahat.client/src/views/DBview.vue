@@ -44,7 +44,7 @@
       },
       async getDBinfo(){
       try {
-        const instanceName = this.$globals.instanceName;
+        const instanceName = this.$cookies.get('selectedInstance')
           const response = await getDBinfo(instanceName);
           this.cards = response.data;
       } catch (error) {

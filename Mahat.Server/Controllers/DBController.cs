@@ -203,12 +203,13 @@ namespace Mahat.Server.Controllers
         [HttpGet]
         [Authorize]
         [Route("tableData/{databaseName}/{tableName}")]
-        public string tableData(string databaseName, string tableName)
+        public string tableData(string databaseName, string tableName, string instanceName)
         {
             var user = (WindowsIdentity)HttpContext.User.Identity;
 
             List<Dictionary<string, object>> tableDataList = new List<Dictionary<string, object>>();
-            SqlConnection con = new SqlConnection(_configuration.GetConnectionString("EmployeeAppCon"));
+            string connectionString = "Server=" + instanceName + ";Database=BestPlaceEver;Integrated Security=SSPI;TrustServerCertificate=True;TrustServerCertificate=True;";
+            SqlConnection con = new SqlConnection(connectionString);
             SqlDataAdapter da = new SqlDataAdapter("USE " + databaseName + "; SELECT* FROM " + tableName, con);
             DataTable dt = new DataTable();
             ApiResponse response = new ApiResponse();
