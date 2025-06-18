@@ -214,7 +214,7 @@ export default {
     async getDBinfo(){
 
     try {
-      const instanceName = this.$globals.instanceName;
+      const instanceName = this.$cookies.get('selectedInstance')
         const response = await getDBinfo(instanceName);
         console.log(response.data);
         this.cards = response.data;

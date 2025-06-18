@@ -13,7 +13,7 @@
 <script>
 import TableCard from "../components/TableCard.vue";
 import Navbar from "../components/Navbar.vue";
-import { getTablesData } from "@/api/DBApi";
+import { tablesInfo } from "@/api/DBApi";
 export default {
   components: {
     TableCard,
@@ -33,10 +33,10 @@ export default {
     };
   },
   methods: {
-    async getTableinfo() {
+    async tablesInfo() {
       try {
-        const instanceName = this.$globals.instanceName;
-        const response = await getTablesData(this.dbName, instanceName);
+        const instanceName = this.$cookies.get('selectedInstance')
+        const response = await tablesInfo(this.dbName, instanceName);
         const res = response.data;
         this.tableCards = [...res];
       } catch (error) {
@@ -44,8 +44,8 @@ export default {
       }
     },
   },
-  mounted() {
-    this.getTableinfo();
+    mounted() { 
+    this.tablesInfo();
   },
 };
 </script>

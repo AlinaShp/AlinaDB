@@ -80,7 +80,7 @@ export default {
       try {
         const usernameResponse = await getUser();
         await store.dispatch('changeUser', usernameResponse.data);
-        const instanceName = this.$globals.instanceName;
+        const instanceName = this.$cookies.get('selectedInstance')
         const response = await getDBinfo(instanceName);
         console.log(response.data);
         this.$router.push('/home')

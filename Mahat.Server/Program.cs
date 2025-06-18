@@ -1,3 +1,5 @@
+using Mahat.Server.Services;
+using Mahat.Server.Repositories;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Negotiate;
@@ -17,6 +19,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IDBService, DBService>();
+builder.Services.AddScoped<IDBRepository, DBRepository>();
 
 builder.Services.AddCors(options =>
 {
