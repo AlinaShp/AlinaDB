@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using System.Security.Principal;
 using System.Data;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Azure.Core;
 
 namespace Mahat.Server.Repositories
 {
@@ -15,7 +16,7 @@ namespace Mahat.Server.Repositories
         public string ExecuteQuery(string instanceName, string request);
         public DataTable RestoreDB(string instanceName, string databaseName);
         public void BackupDB(string instanceName, string databaseName);
-        public DataTable ChangeRecoveryModel(string instanceName, string databaseName, string recoveryModel);
+        public void AddDB(string instanceName, string databaseName, string collection);
     }
 
     public class DBRepository : IDBRepository
@@ -74,14 +75,12 @@ namespace Mahat.Server.Repositories
                     }
                 }
             }
-
             catch (SqlException ex)
             {
-
-                throw ex;
+                throw new InvalidOperationException($"Failed to get DBs on instance '{instanceName}'.", ex);
             }
 
-           return dbList;
+            return dbList;
         }
 
         public List<Table> GetAllTablesData(string instanceName, string databaseName)
@@ -114,14 +113,9 @@ namespace Mahat.Server.Repositories
                     }
                 }
             }
-            catch (InvalidOperationException ex)
-            {
-                throw new InvalidOperationException("Error while executing the query. Please check the database name and connection string.", ex);
-            }
-
             catch (SqlException ex)
             {
-                throw ex;
+                throw new InvalidOperationException($"Failed to get tables in DB '{databaseName}' on instance '{instanceName}'.", ex);
             }
 
             return tablesList;
@@ -155,17 +149,9 @@ namespace Mahat.Server.Repositories
                     }
                 }
             }
-
-            catch (InvalidOperationException ex)
-            {
-
-                throw new InvalidOperationException("Invalid query", ex);
-            }
-
             catch (SqlException ex)
             {
-
-                throw ex;
+                throw new InvalidOperationException($"Failed to get data of table '{tableName}' in DB '{databaseName}' on instance '{instanceName}'.", ex);
             }
 
             return tableDataList;
@@ -207,10 +193,9 @@ namespace Mahat.Server.Repositories
 
                 return JsonConvert.SerializeObject(result);
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
-
-                throw new Exception("An error occurred while executing the query.", ex);
+                throw new InvalidOperationException($"An error occurred while executing the query on instance '{instanceName}'.", ex);
             }
         }
 
@@ -230,10 +215,9 @@ namespace Mahat.Server.Repositories
                 return resultTable;
             }
 
-            catch (Exception ex)
+            catch (SqlException ex)
             {
-
-                throw new Exception($"Internal server error: {ex.Message}");
+                throw new InvalidOperationException($"Failed to restore DB '{databaseName}' on instance '{instanceName}'.", ex);
             }
         }
 
@@ -254,33 +238,33 @@ namespace Mahat.Server.Repositories
                         con.Close();
                     }
 
-                    catch (Exception ex)
+                    catch (SqlException ex)
                     {
-                        throw new Exception($"Internal server error: {ex.Message}");
+                        throw new InvalidOperationException($"Failed to back up DB '{databaseName}' on instance '{instanceName}'.",ex);
                     }
                 }
             }
         }
 
-        public DataTable ChangeRecoveryModel(string instanceName, string databaseName, string recoveryModel)
+        public void AddDB(string instanceName, string databaseName, string collection)
         {
-            string connectionString = "Server=" + instanceName + ";Database=" + databaseName + ";Integrated Security=SSPI;TrustServerCertificate=True;";
-            SqlConnection con = new SqlConnection(connectionString);
+            string connectionString = $"Server={instanceName};Integrated Security=SSPI;TrustServerCertificate=True;";
+            string query = $"CREATE DATABASE {databaseName} COLLATE {collection};";
 
-            SqlDataAdapter adapter = new SqlDataAdapter("ALTER DATABASE " + databaseName + " SET RECOVERY " + recoveryModel + "; SELECT name, recovery_model_desc FROM sys.databases WHERE name = '" + databaseName + "'; ", con);
-            DataTable resultTable = new DataTable();
-            
-            try
+            using (SqlConnection con = new SqlConnection(connectionString))
             {
-                con.Open();
-                adapter.Fill(resultTable);
-                con.Close();
-
-                return resultTable;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Internal server error: {ex.Message}");
+                using (SqlCommand command = new SqlCommand(query, con))
+                {
+                    try
+                    {
+                        con.Open();
+                        command.ExecuteNonQuery();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new InvalidOperationException($"Failed to create database '{databaseName}' on instance '{instanceName}'.", ex);
+                    }
+                }
             }
         }
     }

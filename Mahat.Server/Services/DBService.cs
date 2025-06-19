@@ -16,7 +16,7 @@ namespace Mahat.Server.Services
         public string ExecuteQuery(string instanceName, string request, WindowsIdentity user);
         public DataTable RestoreDB(string instanceName, string databaseName, WindowsIdentity user);
         public void BackupDB(string instanceName, string databaseName, WindowsIdentity user);
-        public DataTable ChangeRecoveryModel(string instanceName, string databaseName, string recoveryModel, WindowsIdentity user);
+        public void AddDB(string instanceName, string databaseName, string collection, WindowsIdentity user);
     }
 
     public class DBService(IDBRepository dBRepository) : IDBService
@@ -29,23 +29,14 @@ namespace Mahat.Server.Services
 
             List<DB> dbList = new List<DB>();
 
-            try
-            {
 #pragma warning disable CA1416 // Validate platform compatibility
 #pragma warning disable CA1416 // Validate platform compatibility
-                WindowsIdentity.RunImpersonated(user.AccessToken, () =>
-                {
-                    dbList = _dbRepository.GetDBInfo(instanceName);
-                });
-#pragma warning restore CA1416 // Validate platform compatibility
-#pragma warning restore CA1416 // Validate platform compatibility
-            }
-
-            catch (SqlException ex)
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
             {
-
-                throw ex;
-            }
+                dbList = _dbRepository.GetDBInfo(instanceName);
+            });
+#pragma warning restore CA1416 // Validate platform compatibility
+#pragma warning restore CA1416 // Validate platform compatibility
 
             if (dbList.Count > 0)
             {
@@ -56,7 +47,7 @@ namespace Mahat.Server.Services
             else
             {
 
-                throw new KeyNotFoundException("No databases found on the instance: " + instanceName);
+                throw new KeyNotFoundException($"No databases on instance '{instanceName}'.");
             }
         }
 
@@ -64,28 +55,12 @@ namespace Mahat.Server.Services
         {
             List<Table> tablesList = new List<Table>();
 
-            try
-            {
 #pragma warning disable CA1416 // Validate platform compatibility
-#pragma warning disable CA1416 // Validate platform compatibility
-                WindowsIdentity.RunImpersonated(user.AccessToken, () =>
-                {
-
-                    tablesList = _dbRepository.GetAllTablesData(instanceName, databaseName);
-                });
-#pragma warning restore CA1416 // Validate platform compatibility
-#pragma warning restore CA1416 // Validate platform compatibility
-            }
-            catch (InvalidOperationException ex)
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
             {
-
-                throw ex;
-            }
-            catch (SqlException ex)
-            {
-
-                throw ex;
-            }
+                tablesList = _dbRepository.GetAllTablesData(instanceName, databaseName);
+            });
+#pragma warning restore CA1416 // Validate platform compatibility
 
             if (tablesList.Count > 0)
             {
@@ -95,32 +70,23 @@ namespace Mahat.Server.Services
             else
             {
 
-                throw new KeyNotFoundException("No databases found on the instance: " + instanceName);
+                throw new KeyNotFoundException($"No tables found in database '{databaseName}' on instance '{instanceName}'.");
             }
         }
 
         public List<Dictionary<string, object>> GetTableData(string instanceName, string databaseName, string tableName, WindowsIdentity user)
         {
             List<Dictionary<string, object>> tableDataList = new List<Dictionary<string, object>>();
-            try
-            {
+
 #pragma warning disable CA1416 // Validate platform compatibility
 #pragma warning disable CA1416 // Validate platform compatibility
-                WindowsIdentity.RunImpersonated(user.AccessToken, () =>
-                {
-                    tableDataList = _dbRepository.GetTableData(instanceName, databaseName, tableName);
-                });
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
+            {
+                tableDataList = _dbRepository.GetTableData(instanceName, databaseName, tableName);
+            });
 #pragma warning restore CA1416 // Validate platform compatibility
 #pragma warning restore CA1416 // Validate platform compatibility
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw ex;
-            }
-            catch (SqlException ex)
-            {
-                throw ex;
-            }
+
 
             if (tableDataList.Count > 0)
             {
@@ -130,98 +96,64 @@ namespace Mahat.Server.Services
             else
             {
 
-                throw new KeyNotFoundException("No data found in the table: " + tableName);
+                throw new KeyNotFoundException($"No data found in table '{tableName}' in DB '{databaseName}' on instance '{instanceName}'.");
             }
         }
 
         public string ExecuteQuery(string instanceName, string request, WindowsIdentity user)
         {
-            try
-            {
-                string result = string.Empty;
+
+            string result = string.Empty;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 #pragma warning disable CA1416 // Validate platform compatibility
-                WindowsIdentity.RunImpersonated(user.AccessToken, () =>
-                {
-                    result = _dbRepository.ExecuteQuery(instanceName, request);
-                });
-#pragma warning restore CA1416 // Validate platform compatibility
-#pragma warning restore CA1416 // Validate platform compatibility
-
-                return result;
-            }
-            catch (Exception ex)
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
             {
+                result = _dbRepository.ExecuteQuery(instanceName, request);
+            });
+#pragma warning restore CA1416 // Validate platform compatibility
+#pragma warning restore CA1416 // Validate platform compatibility
 
-                throw ex;
-            }
+            return result;
         }
 
         public DataTable RestoreDB(string instanceName, string databaseName, WindowsIdentity user)
         {
             DataTable resultTable = new DataTable();
 
-            try
+#pragma warning disable CA1416 // Validate platform compatibility
+#pragma warning disable CA1416 // Validate platform compatibility
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
             {
-#pragma warning disable CA1416 // Validate platform compatibility
-#pragma warning disable CA1416 // Validate platform compatibility
-                WindowsIdentity.RunImpersonated(user.AccessToken, () =>
-                {
-                    resultTable = _dbRepository.RestoreDB(instanceName, databaseName);
-                });
+                resultTable = _dbRepository.RestoreDB(instanceName, databaseName);
+            });
 #pragma warning restore CA1416 // Validate platform compatibility
 #pragma warning restore CA1416 // Validate platform compatibility
 
-                return resultTable;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            return resultTable;
         }
 
         public void BackupDB(string instanceName, string databaseName, WindowsIdentity user)
         {
-            try
-            {
-#pragma warning disable CA1416 // Validate platform compatibility
-#pragma warning disable CA1416 // Validate platform compatibility
-                WindowsIdentity.RunImpersonated(user.AccessToken, () =>
-                {
-                    _dbRepository.BackupDB(instanceName, databaseName);
-                });
-#pragma warning restore CA1416 // Validate platform compatibility
-#pragma warning restore CA1416 // Validate platform compatibility
-            }
-            catch (Exception ex)
-            {
 
-                throw ex;
-            }
+#pragma warning disable CA1416 // Validate platform compatibility
+#pragma warning disable CA1416 // Validate platform compatibility
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
+            {
+                _dbRepository.BackupDB(instanceName, databaseName);
+            });
+#pragma warning restore CA1416 // Validate platform compatibility
+#pragma warning restore CA1416 // Validate platform compatibility
         }
 
-        public DataTable ChangeRecoveryModel(string instanceName, string databaseName, string recoveryModel, WindowsIdentity user)
+        public void AddDB(string instanceName, string databaseName, string collection, WindowsIdentity user)
         {
-            DataTable resultTable = new DataTable();
-
-            try
-            {
 #pragma warning disable CA1416 // Validate platform compatibility
-#pragma warning disable CA1416 // Validate platform compatibility
-                WindowsIdentity.RunImpersonated(user.AccessToken, () =>
-                {
-                    resultTable = _dbRepository.ChangeRecoveryModel(instanceName, databaseName, recoveryModel);
-                });
-#pragma warning restore CA1416 // Validate platform compatibility
-#pragma warning restore CA1416 // Validate platform compatibility
-
-                return resultTable;
-            }
-            catch (Exception ex)
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
             {
-                throw ex;
-            }
+                _dbRepository.AddDB(instanceName, databaseName, collection);
+            });
+#pragma warning restore CA1416 // Validate platform compatibility
         }
     }
 }

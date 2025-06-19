@@ -21,6 +21,7 @@ using System.Collections;
 using Newtonsoft.Json;
 using System.Text;
 using Mahat.Server.Services;
+using Azure;
 namespace Mahat.Server.Controllers
 {
     [Route("api/[controller]")]
@@ -32,8 +33,14 @@ namespace Mahat.Server.Controllers
         [HttpGet]
         [Authorize]
         [Route("DBdata")]
-        public string DBdata(string instanceName)
+        public ActionResult<List<DB>> DBdata(string instanceName)
         {
+
+            if (string.IsNullOrEmpty(instanceName))
+            {
+                return BadRequest("Instance name cannot be null or empty.");
+            }
+
             ApiResponse response = new ApiResponse();
 
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -48,9 +55,9 @@ namespace Mahat.Server.Controllers
                 dbList = _dBService.GetDBInfo(instanceName, user);
 #pragma warning restore CS8604 // Possible null reference argument.
 
-                return JsonConvert.SerializeObject(dbList);
+                return Ok(dbList);
             }
-            catch (SqlException ex)
+            catch (InvalidOperationException ex)
             {
                 response.StatusCode = 500;
                 response.ErrorMessage = ex.Message;
@@ -61,15 +68,21 @@ namespace Mahat.Server.Controllers
                 response.ErrorMessage = ex.Message;
             }
 
-            return JsonConvert.SerializeObject(response);
+            return StatusCode(response.StatusCode, response.ErrorMessage);
         }
 
 
         [HttpGet]
         [Authorize]
         [Route("tablesInfo/{databaseName}")]
-        public string AllTablesData(string databaseName, string instanceName)
+        public ActionResult<List<Table>> AllTablesData(string databaseName, string instanceName)
         {
+
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
+            {
+                return BadRequest("Database name and instance name cannot be null or empty.");
+            }
+
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             var user = (WindowsIdentity)HttpContext.User.Identity;
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -84,9 +97,9 @@ namespace Mahat.Server.Controllers
                 tablesList = _dBService.GetAllTablesData(instanceName, databaseName, user);
 #pragma warning restore CS8604 // Possible null reference argument.
 
-                return JsonConvert.SerializeObject(tablesList);
+                return Ok(tablesList);
             }
-            catch (SqlException ex)
+            catch (InvalidOperationException ex)
             {
                 response.StatusCode = 500;
                 response.ErrorMessage = ex.Message;
@@ -97,14 +110,20 @@ namespace Mahat.Server.Controllers
                 response.ErrorMessage = ex.Message;
             }
 
-            return JsonConvert.SerializeObject(response);
+            return StatusCode(response.StatusCode, response.ErrorMessage);
         }
 
         [HttpGet]
         [Authorize]
         [Route("tableData/{databaseName}/{tableName}")]
-        public string TableData(string databaseName, string tableName, string instanceName)
+        public ActionResult<List<Dictionary<string, object>>> TableData(string databaseName, string tableName, string instanceName)
         {
+
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(instanceName))
+            {
+                return BadRequest("Database name, table name, and instance name cannot be null or empty.");
+            }
+
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             var user = (WindowsIdentity)HttpContext.User.Identity;
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -119,36 +138,34 @@ namespace Mahat.Server.Controllers
                 tableDataList = _dBService.GetTableData(instanceName, databaseName, tableName, user);
 #pragma warning restore CS8604 // Possible null reference argument.
 
-                return JsonConvert.SerializeObject(tableDataList);
+                return Ok(tableDataList);
             }
             catch (InvalidOperationException ex)
-            {
-                response.StatusCode = 400;
-                response.ErrorMessage = ex.Message;
-
-            }
-
-            catch (SqlException ex)
             {
                 response.StatusCode = 500;
                 response.ErrorMessage = ex.Message;
             }
-
             catch (KeyNotFoundException ex)
             {
                 response.StatusCode = 100;
                 response.ErrorMessage = ex.Message;
             }
 
-            return JsonConvert.SerializeObject(response);
+            return StatusCode(response.StatusCode, response.ErrorMessage);
         }
 
 
         [HttpPost]
         [Authorize]
         [Route("executeQuery")]
-        public string ExecuteQuery(string instanceName, [FromBody] string request)
+        public ActionResult<string> ExecuteQuery(string instanceName, [FromBody] string request)
         {
+
+            if (string.IsNullOrEmpty(instanceName) || string.IsNullOrEmpty(request))
+            {
+                return BadRequest("Instance name and request cannot be null or empty.");
+            }
+
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             var user = (WindowsIdentity)HttpContext.User.Identity;
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -161,23 +178,29 @@ namespace Mahat.Server.Controllers
 
                 result = _dBService.ExecuteQuery(instanceName, request, user);
 
-                return result;
+                return Ok(result);
 
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 response.ErrorMessage = ex.Message;
                 response.StatusCode = 500;
             }
 
-            return JsonConvert.SerializeObject(response);
+            return StatusCode(response.StatusCode, response.ErrorMessage);
         }
 
         [HttpPost]
         [Authorize]
         [Route("restore/{databaseName}")]
-        public string RestoreDB(string databaseName, string instanceName)
+        public ActionResult<DataTable> RestoreDB(string databaseName, string instanceName)
         {
+
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
+            {
+                return BadRequest("Database name and instance name cannot be null or empty.");
+            }
+
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             var user = (WindowsIdentity)HttpContext.User.Identity;
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -192,22 +215,28 @@ namespace Mahat.Server.Controllers
                 resultTable = _dBService.RestoreDB(instanceName, databaseName, user);
 #pragma warning restore CS8604 // Possible null reference argument.
 
-                return JsonConvert.SerializeObject(resultTable);
+                return Ok(resultTable);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                response.ErrorMessage = $"Internal server error: {ex.Message}";
+                response.ErrorMessage = ex.Message;
                 response.StatusCode = 500;
             }
 
-            return JsonConvert.SerializeObject(response);
+            return StatusCode(response.StatusCode, response.ErrorMessage);
         }
 
         [HttpPost]
         [Authorize]
         [Route("backup/{databaseName}")]
-        public string BackupDB(string databaseName, string instanceName)
+        public ActionResult<string> BackupDB(string databaseName, string instanceName)
         {
+
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
+            {
+                return BadRequest("Database name and instance name cannot be null or empty.");
+            }
+
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             var user = (WindowsIdentity)HttpContext.User.Identity;
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -219,24 +248,29 @@ namespace Mahat.Server.Controllers
 #pragma warning disable CS8604 // Possible null reference argument.
                 _dBService.BackupDB(instanceName, databaseName, user);
 #pragma warning restore CS8604 // Possible null reference argument.
-                response.StatusCode = 200;
-                response.ErrorMessage = "Backup completed successfully.";
+
+                return Ok("Backup completed successfully.");
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 response.ErrorMessage = ex.Message;
                 response.StatusCode = 500;
             }
 
-            return JsonConvert.SerializeObject(response);
+            return StatusCode(response.StatusCode, response.ErrorMessage);
 
         }
-
-        [HttpPatch]
+        [HttpPost]
         [Authorize]
-        [Route("changeRecoveryModel/{databaseName}")]
-        public string ChangeRecoveryModel(string instanceName, string databaseName, [FromBody] string recoveryModel)
+        [Route("addDB/{databaseName}")]
+        public ActionResult<string> AddDB(string databaseName, string instanceName, string collection = "SQL_Latin1_General_CP1_CI_AS")
         {
+
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
+            {
+                return BadRequest("Database name and instance name cannot be null or empty.");
+            }
+
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             var user = (WindowsIdentity)HttpContext.User.Identity;
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -245,21 +279,19 @@ namespace Mahat.Server.Controllers
 
             try
             {
-                DataTable resultTable = new DataTable();
-
 #pragma warning disable CS8604 // Possible null reference argument.
-                resultTable = _dBService.ChangeRecoveryModel(instanceName, databaseName, recoveryModel, user);
+                _dBService.AddDB(instanceName, databaseName, collection, user);
 #pragma warning restore CS8604 // Possible null reference argument.
 
-                return JsonConvert.SerializeObject(resultTable);
-            }
-            catch (Exception ex)
+                return Ok("DB created successfully.");
+    }
+            catch (InvalidOperationException ex)
             {
                 response.ErrorMessage = ex.Message;
                 response.StatusCode = 500;
             }
-
-            return JsonConvert.SerializeObject(response);
-        }
+            
+            return StatusCode(response.StatusCode, response.ErrorMessage);
+            }
     }
 }
