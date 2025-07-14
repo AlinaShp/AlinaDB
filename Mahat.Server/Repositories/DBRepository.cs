@@ -5,18 +5,21 @@ using System.Security.Principal;
 using System.Data;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Azure.Core;
+using Mahat.Server.DTOs;
 
 namespace Mahat.Server.Repositories
 {
     public interface IDBRepository
     {
         public List<DB> GetDBInfo(string instanceName);
-        public List<Table> GetAllTablesData(string instanceName, string databaseName);
+        public List<TableDto> GetAllTablesData(string instanceName, string databaseName);
         public List<Dictionary<string, object>> GetTableData(string instanceName, string databaseName, string tableName);
         public string ExecuteQuery(string instanceName, string request);
         public DataTable RestoreDB(string instanceName, string databaseName);
         public void BackupDB(string instanceName, string databaseName);
         public void AddDB(string instanceName, string databaseName, string collection);
+        public void AddTable(string instanceName, string databaseName, Table newTable);
+        public void InsertRow(string instanceName, string databaseName, string tableName, Dictionary<string, object> rowData);
     }
 
     public class DBRepository : IDBRepository
@@ -83,7 +86,7 @@ namespace Mahat.Server.Repositories
             return dbList;
         }
 
-        public List<Table> GetAllTablesData(string instanceName, string databaseName)
+        public List<TableDto> GetAllTablesData(string instanceName, string databaseName)
         {
             string connectionString = "Server=" + instanceName + ";Database=" + databaseName + "; Integrated Security=SSPI;TrustServerCertificate=True;TrustServerCertificate=True;";
             SqlConnection con = new SqlConnection(connectionString);
@@ -92,7 +95,7 @@ namespace Mahat.Server.Repositories
                 " = kcu.CONSTRAINT_NAME WHERE tc.CONSTRAINT_TYPE = 'PRIMARY KEY' ORDER BY tc.TABLE_NAME;", con);
 
             DataTable dt = new DataTable();
-            List<Table> tablesList = new List<Table>();
+            List<TableDto> tablesList = new List<TableDto>();
 
             try
             {
@@ -102,7 +105,7 @@ namespace Mahat.Server.Repositories
                 {
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
-                        Table table = new Table();
+                        TableDto table = new TableDto();
 #pragma warning disable CS8601 // Possible null reference assignment.
                         table.TableName = Convert.ToString(dt.Rows[i]["TableName"]);
 #pragma warning restore CS8601 // Possible null reference assignment.
@@ -240,7 +243,7 @@ namespace Mahat.Server.Repositories
 
                     catch (SqlException ex)
                     {
-                        throw new InvalidOperationException($"Failed to back up DB '{databaseName}' on instance '{instanceName}'.",ex);
+                        throw new InvalidOperationException($"Failed to back up DB '{databaseName}' on instance '{instanceName}'.", ex);
                     }
                 }
             }
@@ -263,6 +266,86 @@ namespace Mahat.Server.Repositories
                     catch (SqlException ex)
                     {
                         throw new InvalidOperationException($"Failed to create database '{databaseName}' on instance '{instanceName}'.", ex);
+                    }
+                }
+            }
+        }
+
+        public void AddTable(string instanceName, string databaseName, Table newTable)
+        {
+            string connectionString = $"Server={instanceName};Integrated Security=SSPI;TrustServerCertificate=True;";
+            string colsDefinition = "";
+            for (int i = 0; i < newTable.Cols.Length; i++)
+            {
+                TableCol col = newTable.Cols[i];
+                string colDefinition = $"{col.ColName} {col.DataType} ";
+
+                if (!col.IsNullable)
+                {
+                    colDefinition += "NOT NULL ";
+                }
+                if (col.IsIdentity)
+                {
+                    colDefinition += "IDENTITY(1,1) ";
+                }
+                if (col.IsPrimaryKey)
+                {
+                    colDefinition += "PRIMARY KEY ";
+                }
+                if (col.IsUnique)
+                {
+                    colDefinition += "UNIQUE ";
+                }
+                if (col.IsForeignKey)
+                {
+                    ForeignKeyTableCol foreignKeyTableCol = col as ForeignKeyTableCol;
+
+                    colDefinition += $"FOREIGN KEY REFERENCES {foreignKeyTableCol.ForeignKeyTableName}({foreignKeyTableCol.ForeignKeyColName}) ";
+                }
+                colsDefinition += colDefinition;
+
+                if (i != newTable.Cols.Length - 1)
+                {
+                    colsDefinition += ", ";
+                }
+            }
+            string query = $"USE {databaseName}; CREATE TABLE [{newTable.TableName}] ({colsDefinition});";
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand(query, con))
+                {
+                    try
+                    {
+                        con.Open();
+                        command.ExecuteNonQuery();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new InvalidOperationException($"Failed to create table  {newTable.TableName} in database '{databaseName}' on instance '{instanceName}'.", ex);
+                    }
+                }
+            }
+        }
+
+        public void InsertRow(string instanceName, string databaseName, string tableName, Dictionary<string, object> rowData)
+        {
+            string connectionString = $"Server={instanceName};Database={databaseName};Integrated Security=SSPI;TrustServerCertificate=True;";
+            string columns = string.Join("], [", rowData.Keys);
+            string values = string.Join(", ", rowData.Values.Select(v => $"'{v}'"));
+            string query = $"USE {databaseName}; INSERT INTO [{tableName}] ([{columns}]) VALUES ({values});";
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand(query, con))
+                {
+                    try
+                    {
+                        con.Open();
+                        command.ExecuteNonQuery();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new InvalidOperationException($"Failed to insert row into table '{tableName}' in database '{databaseName}' on instance '{instanceName}'.", ex);
                     }
                 }
             }

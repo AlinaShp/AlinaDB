@@ -22,6 +22,7 @@ using Newtonsoft.Json;
 using System.Text;
 using Mahat.Server.Services;
 using Azure;
+using Mahat.Server.DTOs;
 namespace Mahat.Server.Controllers
 {
     [Route("api/[controller]")]
@@ -75,7 +76,7 @@ namespace Mahat.Server.Controllers
         [HttpGet]
         [Authorize]
         [Route("tablesInfo/{databaseName}")]
-        public ActionResult<List<Table>> AllTablesData(string databaseName, string instanceName)
+        public ActionResult<List<TableDto>> AllTablesData(string databaseName, string instanceName)
         {
 
             if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
@@ -91,7 +92,7 @@ namespace Mahat.Server.Controllers
 
             try
             {
-                List<Table> tablesList = new List<Table>();
+                List<TableDto> tablesList = new List<TableDto>();
 
 #pragma warning disable CS8604 // Possible null reference argument.
                 tablesList = _dBService.GetAllTablesData(instanceName, databaseName, user);
@@ -284,14 +285,84 @@ namespace Mahat.Server.Controllers
 #pragma warning restore CS8604 // Possible null reference argument.
 
                 return Ok("DB created successfully.");
-    }
+            }
             catch (InvalidOperationException ex)
             {
                 response.ErrorMessage = ex.Message;
                 response.StatusCode = 500;
             }
-            
+
             return StatusCode(response.StatusCode, response.ErrorMessage);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("addTable/{databaseName}")]
+        public ActionResult<string> AddTable(string databaseName, string instanceName, [FromBody] Table newTable)
+        {
+
+
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
+            {
+                return BadRequest("Database name and instance name cannot be null or empty.");
             }
+
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            var user = (WindowsIdentity)HttpContext.User.Identity;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+            ApiResponse response = new ApiResponse();
+
+            try
+            {
+#pragma warning disable CS8604 // Possible null reference argument.
+                _dBService.AddTable(instanceName, databaseName, newTable, user);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                return Ok("Table created successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 500;
+            }
+
+            return StatusCode(response.StatusCode, response.ErrorMessage);
+
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("insertRow/{databaseName}/{tableName}")]
+        public ActionResult<string> InsertRow(string tableName, string databaseName, string instanceName, [FromBody] Dictionary<string, object> rowData)
+        {
+            if (string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
+            {
+                return BadRequest("Table name, database name, and instance name cannot be null or empty.");
+            }
+
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            var user = (WindowsIdentity)HttpContext.User.Identity;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+            ApiResponse response = new ApiResponse();
+
+            try
+            {
+#pragma warning disable CS8604 // Possible null reference argument.
+                _dBService.InsertRow(instanceName, databaseName, tableName, rowData, user);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                return Ok("Row inserted successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 500;
+            }
+
+            return StatusCode(response.StatusCode, response.ErrorMessage);
+
+        }
     }
 }

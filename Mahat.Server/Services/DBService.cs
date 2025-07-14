@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using Mahat.Server.DTOs;
 using Mahat.Server.Models;
 using Mahat.Server.Repositories;
 using Microsoft.Data.SqlClient;
@@ -11,12 +12,14 @@ namespace Mahat.Server.Services
     public interface IDBService
     {
         public List<DB> GetDBInfo(string instanceName, WindowsIdentity user);
-        public List<Table> GetAllTablesData(string instanceName, string databaseName, WindowsIdentity user);
+        public List<TableDto> GetAllTablesData(string instanceName, string databaseName, WindowsIdentity user);
         public List<Dictionary<string, object>> GetTableData(string instanceName, string databaseName, string tableName, WindowsIdentity user);
         public string ExecuteQuery(string instanceName, string request, WindowsIdentity user);
         public DataTable RestoreDB(string instanceName, string databaseName, WindowsIdentity user);
         public void BackupDB(string instanceName, string databaseName, WindowsIdentity user);
         public void AddDB(string instanceName, string databaseName, string collection, WindowsIdentity user);
+        public void AddTable(string instanceName, string databaseName, Table newTable, WindowsIdentity user);
+        public void InsertRow(string instanceName, string databaseName, string tableName, Dictionary<string, object> rowData, WindowsIdentity user);
     }
 
     public class DBService(IDBRepository dBRepository) : IDBService
@@ -51,9 +54,9 @@ namespace Mahat.Server.Services
             }
         }
 
-        public List<Table> GetAllTablesData(string instanceName, string databaseName, WindowsIdentity user)
+        public List<TableDto> GetAllTablesData(string instanceName, string databaseName, WindowsIdentity user)
         {
-            List<Table> tablesList = new List<Table>();
+            List<TableDto> tablesList = new List<TableDto>();
 
 #pragma warning disable CA1416 // Validate platform compatibility
             WindowsIdentity.RunImpersonated(user.AccessToken, () =>
@@ -152,6 +155,26 @@ namespace Mahat.Server.Services
             WindowsIdentity.RunImpersonated(user.AccessToken, () =>
             {
                 _dbRepository.AddDB(instanceName, databaseName, collection);
+            });
+#pragma warning restore CA1416 // Validate platform compatibility
+        }
+
+        public void AddTable(string instanceName, string databaseName, Table newTable, WindowsIdentity user)
+        {
+#pragma warning disable CA1416 // Validate platform compatibility
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
+            {
+                _dbRepository.AddTable(instanceName, databaseName, newTable);
+            });
+#pragma warning restore CA1416 // Validate platform compatibility
+        }
+
+        public void InsertRow(string instanceName, string databaseName, string tableName, Dictionary<string, object> rowData, WindowsIdentity user)
+        {
+#pragma warning disable CA1416 // Validate platform compatibility
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
+            {
+                _dbRepository.InsertRow(instanceName, databaseName, tableName, rowData);
             });
 #pragma warning restore CA1416 // Validate platform compatibility
         }
