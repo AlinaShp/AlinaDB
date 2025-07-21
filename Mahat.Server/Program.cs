@@ -26,6 +26,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IDBService, DBService>();
 builder.Services.AddScoped<IDBRepository, DBRepository>();
+builder.Services.AddScoped<ITableService, TableService>();
+builder.Services.AddScoped<ITableRepository, TableRepository>();
 
 builder.Services.AddCors(options =>
 {
