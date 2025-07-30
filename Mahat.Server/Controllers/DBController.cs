@@ -58,9 +58,9 @@ namespace Mahat.Server.Controllers
                 response.StatusCode = 500;
             }
 
-            return StatusCode(response.StatusCode, response.ErrorMessage);  
+            return StatusCode(response.StatusCode, response.ErrorMessage);
         }
-        
+
         [HttpGet]
         [Authorize]
         [Route("DBdata")]
@@ -95,7 +95,7 @@ namespace Mahat.Server.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                response.StatusCode = 100;
+                response.StatusCode = 404;
                 response.ErrorMessage = ex.Message;
             }
 
@@ -124,7 +124,9 @@ namespace Mahat.Server.Controllers
             {
                 string result = string.Empty;
 
+#pragma warning disable CS8604 // Possible null reference argument.
                 result = _dBService.ExecuteQuery(instanceName, request, user);
+#pragma warning restore CS8604 // Possible null reference argument.
 
                 return Ok(result);
 
@@ -168,6 +170,11 @@ namespace Mahat.Server.Controllers
                 response.ErrorMessage = ex.Message;
                 response.StatusCode = 500;
             }
+            catch (KeyNotFoundException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 404;
+            }
 
             return StatusCode(response.StatusCode, response.ErrorMessage);
         }
@@ -201,6 +208,11 @@ namespace Mahat.Server.Controllers
             {
                 response.ErrorMessage = ex.Message;
                 response.StatusCode = 500;
+            }
+            catch (KeyNotFoundException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 404;
             }
 
             return StatusCode(response.StatusCode, response.ErrorMessage);
@@ -236,6 +248,43 @@ namespace Mahat.Server.Controllers
             {
                 response.ErrorMessage = ex.Message;
                 response.StatusCode = 500;
+            }
+
+            return StatusCode(response.StatusCode, response.ErrorMessage);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteDB/{databaseName}")]
+        public ActionResult<string> DeleteDB(string databaseName, string instanceName)
+        {
+
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
+            {
+                return BadRequest("Database name and instance name cannot be null or empty.");
+            }
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            var user = (WindowsIdentity)HttpContext.User.Identity;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+            ApiResponse response = new ApiResponse();
+
+            try
+            {
+#pragma warning disable CS8604 // Possible null reference argument.
+                _dBService.DeleteDB(instanceName, databaseName, user);
+#pragma warning restore CS8604 // Possible null reference argument.
+                return Ok("DB deleted successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 500;
+            }
+            catch (KeyNotFoundException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 404;
             }
 
             return StatusCode(response.StatusCode, response.ErrorMessage);

@@ -10,7 +10,12 @@ namespace Mahat.Server.Repositories
         public List<TableDto> GetAllTablesData(string instanceName, string databaseName);
         public List<Dictionary<string, object>> GetTableData(string instanceName, string databaseName, string tableName);
         public void AddTable(string instanceName, string databaseName, Table newTable);
+        public void DropTable(string instanceName, string databaseName, string tableName);
+        public bool IsTableExists(string instanceName, string databaseName, string tableName);
         public void InsertRow(string instanceName, string databaseName, string tableName, Dictionary<string, object> rowData);
+        public void UpdateRow(string instanceName, string databaseName, string tableName, Dictionary<string, object> rowData, string primaryKeyName, object primaryKeyValue);
+        public void DeleteRow(string instanceName, string databaseName, string tableName, string primaryKeyName, object primaryKeyValue);
+        public bool IsRowExists(string instanceName, string databaseName, string tableName, string primaryKeyName, object primaryKeyValue);
     }
 
     public class TableRepository : ITableRepository
@@ -57,7 +62,7 @@ namespace Mahat.Server.Repositories
             }
             catch (SqlException ex)
             {
-                
+
                 throw new InvalidOperationException($"Failed to get tables in DB '{databaseName}' on instance '{instanceName}'.", ex);
             }
 
@@ -95,12 +100,13 @@ namespace Mahat.Server.Repositories
             }
             catch (SqlException ex)
             {
+
                 throw new InvalidOperationException($"Failed to get data of table '{tableName}' in DB '{databaseName}' on instance '{instanceName}'.", ex);
             }
 
             return tableDataList;
         }
-        
+
         public void AddTable(string instanceName, string databaseName, Table newTable)
         {
             string connectionString = $"Server={instanceName};Database={databaseName};Integrated Security=SSPI;TrustServerCertificate=True;";
@@ -152,7 +158,56 @@ namespace Mahat.Server.Repositories
                     }
                     catch (SqlException ex)
                     {
+
                         throw new InvalidOperationException($"Failed to create table  {newTable.TableName} in database '{databaseName}' on instance '{instanceName}'.", ex);
+                    }
+                }
+            }
+        }
+
+        public void DropTable(string instanceName, string databaseName, string tableName)
+        {
+            string connectionString = $"Server={instanceName};Database={databaseName};Integrated Security=SSPI;TrustServerCertificate=True;";
+            string query = $"DROP TABLE IF EXISTS [{tableName}];";
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand(query, con))
+                {
+                    try
+                    {
+                        con.Open();
+                        command.ExecuteNonQuery();
+                    }
+                    catch (SqlException ex)
+                    {
+
+                        throw new InvalidOperationException($"Failed to drop table '{tableName}' in database '{databaseName}' on instance '{instanceName}'.", ex);
+                    }
+                }
+            }
+        }
+
+        public bool IsTableExists(string instanceName, string databaseName, string tableName)
+        {
+            string connectionString = $"Server={instanceName};Database={databaseName};Integrated Security=SSPI;TrustServerCertificate=True;";
+            string query = $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}'";
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand(query, con))
+                {
+                    try
+                    {
+                        con.Open();
+                        int count = (int)command.ExecuteScalar();
+
+                        return count > 0;
+                    }
+                    catch (SqlException ex)
+                    {
+
+                        throw new InvalidOperationException($"Failed to check existence of table '{tableName}' in database '{databaseName}' on instance '{instanceName}'.", ex);
                     }
                 }
             }
@@ -177,7 +232,89 @@ namespace Mahat.Server.Repositories
                     }
                     catch (SqlException ex)
                     {
+
                         throw new InvalidOperationException($"Failed to insert row into table '{tableName}' in database '{databaseName}' on instance '{instanceName}'.", ex);
+                    }
+                }
+            }
+        }
+
+        public void UpdateRow(string instanceName, string databaseName, string tableName, Dictionary<string, object> rowData, string primaryKeyName, object primaryKeyValue)
+        {
+            string connectionString = $"Server={instanceName};Database={databaseName};Integrated Security=SSPI;TrustServerCertificate=True;";
+            List<string> setClauses = new List<string>();
+            foreach (var kvp in rowData)
+            {
+                setClauses.Add($"[{kvp.Key}] = '{kvp.Value}'");
+            }
+            string setClause = string.Join(", ", setClauses);
+            string query = $@"
+                UPDATE [{tableName}] 
+                SET {setClause} 
+                WHERE [{primaryKeyName}] = '{primaryKeyValue}';";
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand(query, con))
+                {
+                    try
+                    {
+                        con.Open();
+                        command.ExecuteNonQuery();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new InvalidOperationException($"Failed to update row in table '{tableName}' in database '{databaseName}' on instance '{instanceName}'.", ex);
+                    }
+                }
+            }
+        }
+
+        public void DeleteRow(string instanceName, string databaseName, string tableName, string primaryKeyName, object primaryKeyValue)
+        {
+            string connectionString = $"Server={instanceName};Database={databaseName};Integrated Security=SSPI;TrustServerCertificate=True;";
+            string query = $@"
+                DELETE FROM [{tableName}] 
+                WHERE [{primaryKeyName}] = '{primaryKeyValue}';";
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand(query, con))
+                {
+                    try
+                    {
+                        con.Open();
+                        command.ExecuteNonQuery();
+                    }
+                    catch (SqlException ex)
+                    {
+
+                        throw new InvalidOperationException($"Failed to delete row from table '{tableName}' in database '{databaseName}' on instance '{instanceName}'.", ex);
+                    }
+                }
+            }
+        }
+        
+        public bool IsRowExists(string instanceName, string databaseName, string tableName, string primaryKeyName, object primaryKeyValue)
+        {
+            string connectionString = $"Server={instanceName};Database={databaseName};Integrated Security=SSPI;TrustServerCertificate=True;";
+            string query = $@"
+                SELECT COUNT(*) 
+                FROM [{tableName}] 
+                WHERE [{primaryKeyName}] = '{primaryKeyValue}';";
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand(query, con))
+                {
+                    try
+                    {
+                        con.Open();
+                        int count = (int)command.ExecuteScalar();
+
+                        return count > 0;
+                    }
+                    catch (SqlException ex)
+                    {
+
+                        throw new InvalidOperationException($"Failed to check existence of row in table '{tableName}' in database '{databaseName}' on instance '{instanceName}'.", ex);
                     }
                 }
             }

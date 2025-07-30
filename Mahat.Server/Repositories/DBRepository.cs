@@ -17,6 +17,8 @@ namespace Mahat.Server.Repositories
         public void RestoreDB(string instanceName, string databaseName);
         public void BackupDB(string instanceName, string databaseName);
         public void AddDB(string instanceName, string databaseName, string collection);
+        public void DeleteDB(string instanceName, string databaseName);
+        public bool IsDBExists(string instanceName, string databaseName);
     }
 
     public class DBRepository : IDBRepository
@@ -226,6 +228,52 @@ namespace Mahat.Server.Repositories
                     catch (SqlException ex)
                     {
                         throw new InvalidOperationException($"Failed to create database '{databaseName}' on instance '{instanceName}'.", ex);
+                    }
+                }
+            }
+        }
+
+        public void DeleteDB(string instanceName, string databaseName)
+        {
+            string connectionString = $"Server={instanceName};Integrated Security=SSPI;TrustServerCertificate=True;";
+            string query = $@"DROP DATABASE {databaseName};";
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand(query, con))
+                {
+                    try
+                    {
+                        con.Open();
+                        command.ExecuteNonQuery();
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new InvalidOperationException($"Failed to delete database '{databaseName}' on instance '{instanceName}'.", ex);
+                    }
+                }
+            }
+        }
+
+        public bool IsDBExists(string instanceName, string databaseName)
+        {
+            string connectionString = $"Server={instanceName};Integrated Security=SSPI;TrustServerCertificate=True;";
+            string query = $@"SELECT database_id FROM sys.databases WHERE name = '{databaseName}';";
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand(query, con))
+                {
+                    try
+                    {
+                        con.Open();
+                        var result = command.ExecuteScalar();
+
+                        return result != null;
+                    }
+                    catch (SqlException ex)
+                    {
+                        throw new InvalidOperationException($"Failed to check existence of database '{databaseName}' on instance '{instanceName}'.", ex);
                     }
                 }
             }

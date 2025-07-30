@@ -65,7 +65,7 @@ namespace Mahat.Server.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                response.StatusCode = 100;
+                response.StatusCode = 404;
                 response.ErrorMessage = ex.Message;
             }
 
@@ -106,7 +106,7 @@ namespace Mahat.Server.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                response.StatusCode = 100;
+                response.StatusCode = 404;
                 response.ErrorMessage = ex.Message;
             }
 
@@ -119,10 +119,9 @@ namespace Mahat.Server.Controllers
         public ActionResult<string> AddTable(string databaseName, string instanceName, [FromBody] Table newTable)
         {
 
-
-            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName) || newTable == null || !newTable.IsNotNull(newTable))
             {
-                return BadRequest("Database name and instance name cannot be null or empty.");
+                return BadRequest("Database name , instance name and table cannot be null or empty.");
             }
 
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -146,7 +145,41 @@ namespace Mahat.Server.Controllers
             }
 
             return StatusCode(response.StatusCode, response.ErrorMessage);
+        }
 
+        [HttpDelete]
+        [Authorize]
+        [Route("dropTable/{databaseName}/{tableName}")]
+        public ActionResult<string> DropTable(string databaseName, string tableName, string instanceName)
+        {
+
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(instanceName))
+            {
+                return BadRequest("Database name, table name and instance name cannot be null or empty.");
+            }
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            var user = (WindowsIdentity)HttpContext.User.Identity;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            ApiResponse response = new ApiResponse(); 
+            try
+            {
+#pragma warning disable CS8604 // Possible null reference argument.
+                _tableService.DropTable(instanceName, databaseName, tableName, user);
+#pragma warning restore CS8604 // Possible null reference argument.
+                return Ok("Table dropped successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 500;
+            }
+            catch (KeyNotFoundException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 404;
+            }
+
+            return StatusCode(response.StatusCode, response.ErrorMessage);
         }
 
         [HttpPost]
@@ -154,9 +187,10 @@ namespace Mahat.Server.Controllers
         [Route("insertRow/{databaseName}/{tableName}")]
         public ActionResult<string> InsertRow(string tableName, string databaseName, string instanceName, [FromBody] Dictionary<string, object> rowData)
         {
-            if (string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
+            if (string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName) || rowData == null || rowData.Count == 0)
             {
-                return BadRequest("Table name, database name, and instance name cannot be null or empty.");
+
+                return BadRequest("Table name, database name, instance name and data cannot be null or empty.");
             }
 
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -178,9 +212,87 @@ namespace Mahat.Server.Controllers
                 response.ErrorMessage = ex.Message;
                 response.StatusCode = 500;
             }
+            catch (KeyNotFoundException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 404;
+            }
 
             return StatusCode(response.StatusCode, response.ErrorMessage);
+        }
 
+        [HttpPatch]
+        [Authorize]
+        [Route("updateRow/{databaseName}/{tableName}/{primaryKeyName}/{primaryKeyValue}")]
+        public ActionResult<string> UpdateRow(string tableName, string databaseName, string instanceName, [FromRoute] string primaryKeyName, [FromRoute] string primaryKeyValue, [FromBody] Dictionary<string, object> rowData)
+        {
+            if (string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName) || string.IsNullOrEmpty(primaryKeyName) || primaryKeyValue == null || rowData == null || rowData.Count == 0)
+            {
+                return BadRequest("Table name, database name, instance name, primary key and new data cannot be null or empty.");
+            }
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            var user = (WindowsIdentity)HttpContext.User.Identity;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+            ApiResponse response = new ApiResponse();
+
+            try
+            {
+#pragma warning disable CS8604 // Possible null reference argument.
+                _tableService.UpdateRow(instanceName, databaseName, tableName, rowData, primaryKeyName, primaryKeyValue, user);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                return Ok("Row updated successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 500;
+            }
+            catch (KeyNotFoundException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 404;
+            }
+
+            return StatusCode(response.StatusCode, response.ErrorMessage);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("deleteRow/{databaseName}/{tableName}/{primaryKeyName}/{primaryKeyValue}")]
+        public ActionResult<string> DeleteRow(string tableName, string databaseName, string instanceName, string primaryKeyName, string primaryKeyValue)
+        {
+            if (string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName) || string.IsNullOrEmpty(primaryKeyName) || primaryKeyValue == null)
+            {
+                return BadRequest("Table name, database name, instance name and primary key cannot be null or empty.");
+            }
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            var user = (WindowsIdentity)HttpContext.User.Identity;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+            ApiResponse response = new ApiResponse();
+
+            try
+            {
+#pragma warning disable CS8604 // Possible null reference argument.
+                _tableService.DeleteRow(instanceName, databaseName, tableName, primaryKeyName, primaryKeyValue, user);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                return Ok("Row removed successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 500;
+            }
+            catch (KeyNotFoundException ex)
+            {
+                response.ErrorMessage = ex.Message;
+                response.StatusCode = 404;
+            }
+
+            return StatusCode(response.StatusCode, response.ErrorMessage);
         }
     }
 }

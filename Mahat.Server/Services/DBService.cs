@@ -18,6 +18,9 @@ namespace Mahat.Server.Services
         public void RestoreDB(string instanceName, string databaseName, WindowsIdentity user);
         public void BackupDB(string instanceName, string databaseName, WindowsIdentity user);
         public void AddDB(string instanceName, string databaseName, string collection, WindowsIdentity user);
+        public void DeleteDB(string instanceName, string databaseName, WindowsIdentity user);
+        public bool IsDBExists(string instanceName, string databaseName, WindowsIdentity user);
+
 }
 
     public class DBService(IDBRepository dBRepository) : IDBService
@@ -27,7 +30,7 @@ namespace Mahat.Server.Services
 
         public void CheckConnection(string instanceName, WindowsIdentity user)
         {
-            #pragma warning disable CA1416 // Validate platform compatibility
+#pragma warning disable CA1416 // Validate platform compatibility
             WindowsIdentity.RunImpersonated(user.AccessToken, () =>
             {
                 _dbRepository.CheckConnection(instanceName);
@@ -81,6 +84,11 @@ namespace Mahat.Server.Services
 
         public void RestoreDB(string instanceName, string databaseName, WindowsIdentity user)
         {
+            if (!IsDBExists(instanceName, databaseName, user))
+            {
+                
+                throw new KeyNotFoundException($"Database '{databaseName}' does not exist on instance '{instanceName}'.");
+            }
 
 #pragma warning disable CA1416 // Validate platform compatibility
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -94,14 +102,18 @@ namespace Mahat.Server.Services
 
         public void BackupDB(string instanceName, string databaseName, WindowsIdentity user)
         {
+            if (!IsDBExists(instanceName, databaseName, user))
+            {
+                
+                throw new KeyNotFoundException($"Database '{databaseName}' does not exist on instance '{instanceName}'.");
+            }
 
-#pragma warning disable CA1416 // Validate platform compatibility
+
 #pragma warning disable CA1416 // Validate platform compatibility
             WindowsIdentity.RunImpersonated(user.AccessToken, () =>
             {
                 _dbRepository.BackupDB(instanceName, databaseName);
             });
-#pragma warning restore CA1416 // Validate platform compatibility
 #pragma warning restore CA1416 // Validate platform compatibility
         }
 
@@ -114,5 +126,36 @@ namespace Mahat.Server.Services
             });
 #pragma warning restore CA1416 // Validate platform compatibility
         }
+
+        public void DeleteDB(string instanceName, string databaseName, WindowsIdentity user)
+        {
+            if (!IsDBExists(instanceName, databaseName, user))
+            {
+
+                throw new KeyNotFoundException($"Database '{databaseName}' does not exist on instance '{instanceName}'.");
+            }
+
+#pragma warning disable CA1416 // Validate platform compatibility
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
+            {
+                _dbRepository.DeleteDB(instanceName, databaseName);
+            });
+#pragma warning restore CA1416 // Validate platform compatibility
+        }
+
+        public bool IsDBExists(string instanceName, string databaseName, WindowsIdentity user)
+        {
+            bool isExist = false;
+
+#pragma warning disable CA1416 // Validate platform compatibility
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
+            {
+                isExist = _dbRepository.IsDBExists(instanceName, databaseName);
+            });
+#pragma warning restore CA1416 // Validate platform compatibility
+
+            return isExist;
+        }
+
     }
 }
