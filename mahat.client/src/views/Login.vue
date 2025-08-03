@@ -19,8 +19,6 @@
                   </button>
                   <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <li><a class="dropdown-item"  @click="selectInstance('WIN-6OA5JFTRURC\\SQLEXPRESS')" href="#">WIN-6OA5JFTRURC\SQLEXPRESS</a></li>
-                    <li><a class="dropdown-item" @click="selectInstance('ProjectSQL2')" href="#">ProjectSQL2</a></li>
-                    <li><a class="dropdown-item" @click="selectInstance('ProjectSQL3')" href="#">ProjectSQL3</a></li>
                   </ul>
                 </div>
     </div>
@@ -72,13 +70,14 @@
     },
     methods: {
       selectInstance(instance) {
-        this.$globals.instanceName = instance;
+        this.$cookies.set('selectedInstance', instance, '1d')
         this.selectedInstance = instance;
     },
     async signin(){
       try {
         const usernameResponse = await getUser();
         await this.$store.dispatch('changeUser', usernameResponse.data);
+        
         this.$router.push('/home')
       } catch (error) {
         console.error('Error logging in:', error);
