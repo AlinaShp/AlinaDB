@@ -6,6 +6,8 @@ import TablesView from '../views/TablesView.vue';
 import Table from "../views/Table.vue";
 
 
+
+
 import { useStore } from 'vuex'
 
 const routes = [
@@ -14,6 +16,7 @@ const routes = [
   { path: '/', component: Login, meta: { requiresAuth: true } },
   { path: '/home', component: HomeView },
   { path: '/DBview', component: DBview },
+  { path: '/Login', component: Login },
   
   { path: '/DBview/TablesView',
     component: TablesView,

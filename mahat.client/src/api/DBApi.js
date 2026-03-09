@@ -1,6 +1,6 @@
 import axios from "axios";
-const API_URL = "https://back.mahat.com/api/DB/";
-
+//const API_URL = "https://back.mahat.com/api/DB/";.
+const API_URL = "http://localhost:5283/api/DBcontroller/";
 const changeRecoveryModel = async (databaseName, instanceName) => {
   
   const response = await axios.patch(
@@ -13,6 +13,7 @@ const changeRecoveryModel = async (databaseName, instanceName) => {
 
   return response;
 };
+
 
 const backupDatabase = async (databaseName , instanceName) => {
   
@@ -44,7 +45,6 @@ const getDBinfo = async (instanceName) => {
   
 
   const response = await axios.get(`${API_URL}DBdata?instancename=${instanceName}`, {
-    withCredentials: "true",
     headers: {
       "Content-Type": "application/json",
     },

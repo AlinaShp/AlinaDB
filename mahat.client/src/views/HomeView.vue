@@ -1,12 +1,13 @@
 <template>
-    <body>
+    <div>
        <DBview></DBview> 
-    </body>
+    </div>
   </template>
   
   <script>
   import LoginPage from '@/components/LoginPage.vue';
   import DBview from "./DBview.vue";
+  
   import { mapActions, mapGetters,  mapState, mapMutations } from 'vuex';
   
   export default {
@@ -17,7 +18,7 @@
     },
     
     computed: {
-      ...mapGetters(['isAuthenticated']),
+      //...mapGetters(['isAuthenticated']),
       user() {
         return this.$store.state.user;
       },
