@@ -18,11 +18,7 @@
 
       <!-- Backup Path -->
       <label class="modal-label">Backup File Path</label>
-      <input
-        v-model="backupPath"
-        placeholder="C:\\Backups\\MyDatabase.bak"
-        class="modal-input"
-      />
+      <input v-model="backupPath" placeholder="C:\\Backups\\MyDatabase.bak" class="modal-input" />
 
       <!-- Overwrite -->
       <div class="checkbox-row">
@@ -32,34 +28,34 @@
 
       <!-- Buttons -->
       <div class="modal-actions">
-        <button class="btn btn-cancel" @click="closeModal">
-          Cancel
-        </button>
-        <button class="btn btn-run" @click="restoreDatabase">
-          Restore
-        </button>
+        <button class="btn btn-cancel" @click="closeModal">Cancel</button>
+        <button class="btn btn-run" @click="runRestore">Restore</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import Swal from "sweetalert2";
+import { restoreDatabase, getDBinfo } from "../api/DBApi";
 export default {
   name: "RestoreModal",
+  props: {
+    instanceName: String,
+  },
   data() {
     return {
       visible: false,
       selectedDatabase: "",
       backupPath: "",
       overwrite: false,
-
-      // TEST MODE
-      databases: ["AdventureWorks2022", "master", "ReportDB"],
+      databases: [],
     };
   },
   methods: {
     showModal() {
       this.visible = true;
+      this.loadDatabases();
     },
     closeModal() {
       this.visible = false;
@@ -67,20 +63,76 @@ export default {
       this.backupPath = "";
       this.overwrite = false;
     },
-    restoreDatabase() {
+    async loadDatabases() {
+      // TEST
+      this.databases = ["AdventureWorks2022", "master", "ReportDB"];
+      // AXIOS
+      try {
+        const response = await getDBinfo(this.instanceName);
+
+        this.databases = response.data.map((db) => db.databaseName);
+        console.error(error);
+
+        const msg =
+          error.response?.data?.message ||
+          error.message;
+
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to load databases",
+          text: msg,
+        });
+
+        console.error(error);
+      }
+    },
+
+    async runRestore() {
       if (!this.selectedDatabase || !this.backupPath) {
-        alert("All fields are required.");
+        Swal.fire({
+          icon: "warning",
+          title: "Missing fields",
+          text: "Database and backup path are required.",
+        });
+
         return;
       }
 
-      console.log("Simulated Restore:", {
-        database: this.selectedDatabase,
-        path: this.backupPath,
-        overwrite: this.overwrite,
-      });
+      try {
+        Swal.fire({
+          title: "Restoring database...",
+          text: "Please wait",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
 
-      alert("Database restore simulated successfully!");
-      this.closeModal();
+        await restoreDatabase(this.selectedDatabase, this.instanceName);
+
+        Swal.fire({
+          icon: "success",
+          title: "Restore completed",
+          text: `${this.selectedDatabase} restored successfully`,
+        });
+
+        this.closeModal();
+      } catch (error) {
+
+        console.error(error);
+
+        const msg =
+          error.response?.data?.message ||
+          error.message;
+
+        Swal.fire({
+          icon: "error",
+          title: "Restore failed",
+          text: msg,
+        });
+
+      }
     },
   },
 };

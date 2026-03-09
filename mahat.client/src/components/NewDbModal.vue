@@ -49,7 +49,7 @@
         <button class="btn btn-cancel" @click="closeModal">
           Cancel
         </button>
-        <button class="btn btn-run" @click="createDatabase">
+        <button class="btn btn-run" @click="createDB">
           Create
         </button>
       </div>
@@ -58,12 +58,17 @@
 </template>
 
 <script>
+import Swal from "sweetalert2";
+import { createDatabase } from "../api/DBApi";
+
 export default {
   name: "NewDbModal",
+  props: {
+    instanceName: String
+  },
   data() {
     return {
       visible: false,
-
       dbName: "",
       collation: "SQL_Latin1_General_CP1_CI_AS",
       initialSize: 50,
@@ -84,13 +89,16 @@ export default {
       this.initialSize = 50;
       this.autoGrowth = true;
     },
-    createDatabase() {
+    async createDB() {
       if (!this.dbName) {
-        alert("Database name is required.");
+        Swal.fire({
+          icon: "warning",
+          title: "Database name required",
+          text: "Please enter a name for the new database.",
+        });
         return;
       }
 
-      // Simulated payload (ready for backend)
       const payload = {
         databaseName: this.dbName,
         collation: this.collation,
@@ -98,10 +106,33 @@ export default {
         autoGrowth: this.autoGrowth,
       };
 
-      console.log("Simulated CREATE DATABASE:", payload);
+      try {
+        Swal.fire({
+          title: "Creating database...",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
 
-      alert(`Database "${this.dbName}" created successfully (simulated).`);
-      this.closeModal();
+        await createDatabase(this.instanceName, payload);
+
+        Swal.fire({
+          icon: "success",
+          title: "Database Created",
+          text: `Database "${this.dbName}" has been created successfully.`,
+        });
+
+        this.closeModal();
+
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          icon: "error",
+          title: "Creation Failed",
+          text: `Could not create the database.`,
+        });
+      }
     },
   },
 };

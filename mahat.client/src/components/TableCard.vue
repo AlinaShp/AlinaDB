@@ -1,7 +1,6 @@
 <template>
   <div class="tablecard-wrapper">
     <div class="tablecard">
-
       <!-- Delete table button -->
       <button class="delete-btn" @click.stop="deleteTable">
         <!-- Garbage icon -->
@@ -38,18 +37,14 @@
       </div>
 
       <!-- Data button -->
-      <button
-        @click="tableDataButtonClick(tableCard.TableName)"
-        class="data-btn"
-      >
-        DATA →
-      </button>
-
+      <button @click="tableDataButtonClick(tableCard.TableName)" class="data-btn">DATA →</button>
     </div>
   </div>
 </template>
 
 <script>
+import Swal from "sweetalert2";
+
 export default {
   props: {
     tableCard: {
@@ -61,6 +56,7 @@ export default {
       required: true,
     },
   },
+
   methods: {
     tableDataButtonClick(tableName) {
       this.$router.push({
@@ -68,7 +64,20 @@ export default {
         query: { tableName, databaseName: this.databaseName },
       });
     },
-    deleteTable() {
+
+    async deleteTable() {
+      const result = await Swal.fire({
+        title: "Delete Table?",
+        text: `Are you sure you want to delete "${this.tableCard.TableName}"?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it",
+      });
+
+      if (!result.isConfirmed) return;
+
       this.$emit("deleteTable", this.tableCard.TableName);
     },
   },
