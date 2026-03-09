@@ -23,12 +23,7 @@
 
       <!-- Backup Path -->
       <label class="modal-label">Backup File Path</label>
-      <input
-        type="text"
-        v-model="backupPath"
-        placeholder="C:\\Backups\\"
-        class="modal-input"
-      />
+      <input type="text" v-model="backupPath" placeholder="C:\\Backups\\" class="modal-input" />
 
       <!-- File Name -->
       <label class="modal-label">Backup File Name</label>
@@ -41,18 +36,17 @@
 
       <!-- Actions -->
       <div class="modal-actions">
-        <button class="btn btn-cancel" @click="closeModal">
-          Cancel
-        </button>
-        <button class="btn btn-run" @click="runBackup">
-          Backup
-        </button>
+        <button class="btn btn-cancel" @click="closeModal">Cancel</button>
+        <button class="btn btn-run" @click="runBackup">Backup</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import Swal from "sweetalert2";
+import { backupDatabase, getDBinfo } from "../api/DBApi";
+
 export default {
   name: "BackupModal",
   data() {
@@ -78,11 +72,33 @@ export default {
       this.backupFile = "";
     },
     async loadDatabases() {
+      //TEST
       this.databases = ["AdventureWorks2022", "master", "ReportDB"];
+      //AXIOS
+      try {
+        const response = await getDBinfo(this.instanceName);
+
+        // assuming API returns list of DB objects
+        this.databases = response.data.map((db) => db.databaseName);
+      } catch (error) {
+        console.error(error);
+
+        Swal.fire({
+          icon: "error",
+          title: "Failed to load databases",
+          text: "Could not retrieve database list.",
+        });
+      }
     },
+    
     async runBackup() {
       if (!this.selectedDatabase || !this.backupPath || !this.backupFile) {
-        alert("All fields are required.");
+       Swal.fire({
+          icon: "warning",
+          title: "Missing fields",
+          text: "All fields are required."
+        });
+
         return;
       }
 
@@ -93,8 +109,43 @@ export default {
         fileName: this.backupFile,
       });
 
-      alert("Backup simulated successfully!");
-      this.closeModal();
+       try {
+
+        Swal.fire({
+          title: "Running backup...",
+          text: "Please wait",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        await backupDatabase(
+          this.selectedDatabase,
+          this.instanceName
+        );
+
+        Swal.fire({
+          icon: "success",
+          title: "Backup completed",
+          text: `${this.selectedDatabase} backed up successfully`
+        });
+
+        this.closeModal();
+
+      } catch (error) {
+
+        Swal.fire({
+          icon: "error",
+          title: "Backup failed",
+          text: "The database backup could not be completed."
+        });
+
+        console.error(error);
+        
+      }
+    
+      
     },
   },
 };
@@ -213,6 +264,10 @@ export default {
 .btn-run:hover {
   transform: translateY(-2px);
   box-shadow: 0 0 18px rgba(255, 120, 200, 0.85);
+}
+
+.swal-top {
+  z-index: 99999 !important;
 }
 
 /* Animation */

@@ -25,45 +25,79 @@
 </template>
 
 <script>
-import axios from "axios";
+import Swal from "sweetalert2";
+import { executeQuery } from "../api/DBApi";
 
 export default {
   name: "QueryModal",
+
   data() {
     return {
       visible: false,
       queryText: "",
     };
   },
+
   methods: {
     showModal() {
       this.visible = true;
     },
+
     closeModal() {
       this.visible = false;
       this.queryText = "";
     },
+
     async runQuery() {
+
       if (!this.queryText.trim()) {
-        alert("Query cannot be empty");
+        Swal.fire({
+          icon: "warning",
+          title: "Query cannot be empty",
+          text: "Please enter a SQL query."
+        });
         return;
       }
 
       try {
+
         const instanceName = this.$cookies.get("selectedInstance");
 
-        const response = await axios.post("http://localhost:50856/api/query", {
-          query: this.queryText,
-          instance: instanceName,
+        Swal.fire({
+          title: "Executing query...",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
         });
+
+        const response = await executeQuery(
+          instanceName,
+          this.queryText
+        );
 
         console.log("Query Response:", response.data);
 
-        alert("Query executed successfully!");
+        Swal.fire({
+          icon: "success",
+          title: "Query executed successfully"
+        });
+
         this.closeModal();
-      } catch (err) {
-        console.error(err);
-        alert("Error running query. Check console.");
+
+      } catch (error) {
+
+        console.error(error);
+
+        const msg =
+          error.response?.data?.message ||
+          error.message;
+
+        Swal.fire({
+          icon: "error",
+          title: "Query execution failed",
+          text: msg
+        });
       }
     },
   },

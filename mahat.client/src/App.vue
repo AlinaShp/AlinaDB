@@ -49,4 +49,7 @@ router-view {
   position: relative;
   z-index: 1;
 }
+.swal2-container {
+  z-index: 10000 !important;
+}
 </style>

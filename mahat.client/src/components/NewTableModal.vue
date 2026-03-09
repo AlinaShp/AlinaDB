@@ -73,31 +73,64 @@
 
 
 <script>
+import Swal from "sweetalert2";
+import { addTable } from "../api/TableApi";
+import { getDBinfo } from "../api/DBApi";
+
 export default {
   name: "NewTableModal",
+
+  props: {
+    instanceName: String
+  },
+
   data() {
     return {
       visible: false,
       database: "",
       tableName: "",
+      databases: [],
+
       columns: [
         { name: "Id", type: "INT", nullable: false }
-      ],
-
-      // TEST MODE
-      databases: ["AdventureWorks2022", "ReportDB"]
+      ]
     };
   },
+
   methods: {
-    showModal() {
+
+    async showModal() {
       this.visible = true;
+      await this.loadDatabases();
     },
+
     closeModal() {
       this.visible = false;
       this.database = "";
       this.tableName = "";
       this.columns = [{ name: "Id", type: "INT", nullable: false }];
     },
+
+    async loadDatabases() {
+      // TEST
+      this.databases = ["AdventureWorks2022", "master", "ReportDB"];
+      // AXIOS
+      try {
+        const response = await getDBinfo(this.instanceName);
+        this.databases = response.data.map(db => db.databaseName);
+
+      } catch (error) {
+
+        Swal.fire({
+          icon: "error",
+          title: "Failed to load databases",
+          text: "Could not retrieve database list."
+        });
+
+        console.error(error);
+      }
+    },
+
     addColumn() {
       this.columns.push({
         name: "",
@@ -105,30 +138,74 @@ export default {
         nullable: true
       });
     },
+
     removeColumn(index) {
       this.columns.splice(index, 1);
     },
-    createTable() {
+
+    async createTable() {
+
       if (!this.database || !this.tableName) {
-        alert("Database and table name are required.");
+        Swal.fire({
+          icon: "warning",
+          title: "Missing information",
+          text: "Database and table name are required."
+        });
         return;
       }
 
       if (this.columns.some(c => !c.name)) {
-        alert("All columns must have names.");
+        Swal.fire({
+          icon: "warning",
+          title: "Invalid columns",
+          text: "All columns must have names."
+        });
         return;
       }
 
       const payload = {
-        database: this.database,
         table: this.tableName,
         columns: this.columns
       };
 
-      console.log("Create table payload:", payload);
+      try {
 
-      alert("Table creation simulated successfully!");
-      this.closeModal();
+        Swal.fire({
+          title: "Creating table...",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        await addTable(
+          this.database,
+          this.instanceName,
+          payload
+        );
+
+        Swal.fire({
+          icon: "success",
+          title: "Table Created",
+          text: `Table "${this.tableName}" created successfully.`
+        });
+
+        this.closeModal();
+
+      } catch (error) {
+
+        const msg =
+          error.response?.data?.message ||
+          error.message;
+
+        Swal.fire({
+          icon: "error",
+          title: "Table creation failed",
+          text: msg
+        });
+
+        console.error(error);
+      }
     }
   }
 };

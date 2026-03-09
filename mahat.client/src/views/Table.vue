@@ -5,14 +5,24 @@
     <h2 class="table-title">{{ tableName }}</h2>
     <div class="divider"></div>
 
-      <!-- Toolbar -->
+    <!-- Toolbar -->
     <div class="table-toolbar">
-      <button class="add-btn" @click="addRow" title="Add Row">
+      <button class="btn-add-row" @click="addRow" title="Add Row">
         <!-- Plus icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="plus-icon"
+        >
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
+        Add Row
       </button>
     </div>
 
@@ -32,11 +42,7 @@
           <tr v-for="(row, rowIndex) in tableData" :key="rowIndex">
             <td v-for="header in tableHeaders" :key="header">
               <span v-if="editRow !== rowIndex">{{ row[header] }}</span>
-              <input
-                v-else
-                v-model="editableRow[header]"
-                class="edit-input"
-              />
+              <input v-else v-model="editableRow[header]" class="edit-input" />
             </td>
 
             <!-- Actions -->
@@ -85,11 +91,7 @@
               </button>
 
               <!-- DELETE -->
-              <button
-                class="action-btn delete"
-                title="Delete"
-                @click="deleteRow(rowIndex)"
-              >
+              <button class="action-btn delete" title="Delete" @click="deleteRow(rowIndex)">
                 <!-- Garbage -->
                 <svg viewBox="0 0 24 24">
                   <polyline points="3 6 5 6 21 6" />
@@ -109,6 +111,8 @@
 
 <script>
 import Navbar from "../components/Navbar.vue";
+import Swal from "sweetalert2";
+import { insertRow, updateRow, deleteRow, getTableData } from "@/api/TableApi";
 
 export default {
   components: { Navbar },
@@ -122,38 +126,162 @@ export default {
       tableHeaders: [],
       editRow: null,
       editableRow: {},
+      loading: true,
     };
   },
   mounted() {
+    //TEST
     this.tableData = [
       { Id: 1, Name: "Product A", Price: 29.99, InStock: true },
       { Id: 2, Name: "Product B", Price: 14.5, InStock: false },
     ];
     this.tableHeaders = Object.keys(this.tableData[0]);
+
+    //AXIOS
+    this.fetchTableData();
   },
   methods: {
+    async fetchTableData() {
+      try {
+        this.loading = true;
+        const instanceName = this.$cookies.get("selectedInstance");
+
+        // Fetch table data from API
+        const response = await getTableData(this.databaseName, this.tableName, instanceName);
+
+        this.tableData = response.data || [];
+
+        // Extract headers dynamically from first row
+        if (this.tableData.length > 0) {
+          this.tableHeaders = Object.keys(this.tableData[0]);
+        } else {
+          this.tableHeaders = [];
+        }
+
+        this.loading = false;
+      } catch (error) {
+        this.loading = false;
+        Swal.fire({
+          icon: "error",
+          title: "Failed to fetch table data",
+          text: error.response?.data || error.message,
+        });
+      }
+    },
+
+    async addRow() {
+      const row = {};
+      this.tableHeaders.forEach((h) => (row[h] = ""));
+      try {
+        const instanceName = this.$cookies.get("selectedInstance");
+
+        await insertRow(this.databaseName, this.tableName, instanceName, row);
+
+        Swal.fire({
+          icon: "success",
+          title: "Row added",
+          showConfirmButton: false,
+          timer: 1200,
+        });
+
+        this.tableData.push(row);
+        this.toggleEdit(this.tableData.length - 1);
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to add row",
+          text: error.response?.data || error.message,
+        });
+      }
+    },
+
     toggleEdit(i) {
       this.editRow = i;
       this.editableRow = { ...this.tableData[i] };
     },
+
     cancelEdit() {
       this.editRow = null;
       this.editableRow = {};
     },
-    saveRow(i) {
-      this.tableData[i] = { ...this.editableRow };
-      this.editRow = null;
+
+    async saveRow(i) {
+      try {
+        const instanceName = this.$cookies.get("selectedInstance");
+        const row = this.editableRow;
+        const primaryKeyName = this.tableHeaders[0];
+        const primaryKeyValue = row[primaryKeyName];
+
+        await updateRow(
+          this.databaseName,
+          this.tableName,
+          instanceName,
+          primaryKeyName,
+          primaryKeyValue,
+          row,
+        );
+
+        Swal.fire({
+          icon: "success",
+          title: "Row saved",
+          showConfirmButton: false,
+          timer: 1200,
+        });
+
+        this.tableData[i] = { ...row };
+        this.editRow = null;
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to save row",
+          text: error.response?.data || error.message,
+        });
+      }
     },
-    addRow() {
-      const row = {};
-      this.tableHeaders.forEach(h => (row[h] = ""));
-      this.tableData.push(row);
-      this.toggleEdit(this.tableData.length - 1);
-    },
-    deleteRow(i) {
-      if (!confirm("Delete this row?")) return;
-      this.tableData.splice(i, 1);
-      this.editRow = null;
+
+    async deleteRow(i) {
+      try {
+        const row = this.tableData[i];
+        const instanceName = this.$cookies.get("selectedInstance");
+        const primaryKeyName = this.tableHeaders[0]; // first column is PK
+        const primaryKeyValue = row[primaryKeyName];
+
+        const result = await Swal.fire({
+          title: "Delete row?",
+          text: `Are you sure you want to delete this row?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, delete it",
+        });
+
+        if (!result.isConfirmed) return;
+
+        await deleteRow(
+          this.databaseName,
+          this.tableName,
+          instanceName,
+          primaryKeyName,
+          primaryKeyValue,
+        );
+
+        Swal.fire({
+          icon: "success",
+          title: "Row deleted",
+          showConfirmButton: false,
+          timer: 1200,
+        });
+
+        this.tableData.splice(i, 1);
+        this.editRow = null;
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to delete row",
+          text: error.response?.data || error.message,
+        });
+      }
     },
   },
 };
@@ -187,18 +315,42 @@ export default {
 }
 
 .table-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
-.add-btn {
+.table-toolbar {
+  margin-bottom: 20px;
+}
+
+.btn-add-row {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* space between icon and text */
+  padding: 10px 22px;
   background: linear-gradient(90deg, #ff6ec7, #ff9ce6);
   border: none;
-  padding: 10px 18px;
   border-radius: 10px;
   font-weight: 700;
+  font-size: 1em;
+  color: #2d1f30; /* text color */
   cursor: pointer;
+  box-shadow: 0 0 12px rgba(255, 120, 200, 0.45);
+  transition: all 0.25s ease;
+}
+
+.btn-add-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 24px rgba(255, 140, 220, 0.85);
+}
+
+.plus-icon {
+  width: 24px;
+  height: 24px;
+  stroke: #2d1f30; /* matches text color, visible on gradient */
+}
+
+.add-text {
+  font-weight: bold;
 }
 
 .table-wrapper {
@@ -264,32 +416,18 @@ export default {
   box-shadow: 0 0 14px rgba(255, 120, 200, 0.6);
   transform: scale(1.08);
 }
-/* === Add Row Button UX/UI === */
-.add-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: none;
-  background: rgba(255, 110, 200, 0.15);
-  color: #ff9ce6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(6px);
-}
-
-.add-btn:hover {
-  background: rgba(255, 110, 200, 0.35);
-  color: #2d1f2c;
-  box-shadow: 0 0 14px rgba(255, 120, 200, 0.6);
-  transform: scale(1.05);
-}
 
 /* Color accents */
-.action-btn.edit { color: #9dd0ff; }
-.action-btn.save { color: #9dffd6; }
-.action-btn.cancel { color: #ffd39d; }
-.action-btn.delete { color: #ff9d9d; }
+.action-btn.edit {
+  color: #9dd0ff;
+}
+.action-btn.save {
+  color: #9dffd6;
+}
+.action-btn.cancel {
+  color: #ffd39d;
+}
+.action-btn.delete {
+  color: #ff9d9d;
+}
 </style>

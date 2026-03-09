@@ -8,7 +8,6 @@
         title="Delete database"
         @click="deleteDb"
       >
-        <!-- Trash icon -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -31,7 +30,6 @@
 
       <div class="divider"></div>
 
-      <!-- Info fields -->
       <div class="info">
         <div class="info-row">
           <span class="label">ID:</span>
@@ -65,6 +63,8 @@
 </template>
 
 <script>
+import Swal from "sweetalert2";
+
 export default {
   props: {
     card: {
@@ -72,19 +72,31 @@ export default {
       required: true,
     },
   },
+
   methods: {
+
     tableButtonClick() {
       this.$emit("buttonClick");
     },
-    deleteDb() {
-      if (
-        confirm(`Are you sure you want to delete database "${this.card.DatabaseName}"?`)
-      ) {
-        console.log("Delete DB:", this.card.DatabaseName);
-        // 🔥 API call goes here
-      }
-    },
-  },
+
+    async deleteDb() {
+
+    const result = await Swal.fire({
+      title: "Delete Database?",
+      text: `Are you sure you want to delete "${this.card.DatabaseName}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it"
+    });
+
+    if (!result.isConfirmed) return;
+
+    this.$emit("delete", this.card);
+  }
+
+  }
 };
 </script>
 
