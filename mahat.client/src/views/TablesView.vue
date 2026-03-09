@@ -1,9 +1,9 @@
 <template>
   <Navbar></Navbar>
+  <h2 class="title">{{ dbName }}</h2>
   <div id="tableCards">
-    <h1>{{ dbName }}</h1>
     <div class="row">
-      <div class="col-4" v-for="tableCard in tableCards" :key="tableCard.id">
+      <div class="col-4 mb-5" v-for="tableCard in tableCards" :key="tableCard.id">
         <TableCard :tableCard="tableCard" :databaseName="dbName"></TableCard>
       </div>
     </div>
@@ -35,10 +35,39 @@ export default {
   methods: {
     async tablesInfo() {
       try {
+        //TEST
         const instanceName = this.$cookies.get('selectedInstance')
-        const response = await tablesInfo(this.dbName, instanceName);
-        const res = response.data;
-        this.tableCards = [...res];
+        //const response = await tablesInfo(this.dbName, instanceName);
+        //const res = response.data;
+       // this.tableCards = [...res];
+        const tableCards_response = [
+      {
+        TableName: "Employees",
+        PrimaryKey: "EmployeeID"
+      },
+      {
+        TableName: "Orders",
+        PrimaryKey: "OrderID"
+      },
+      {
+        TableName: "Products",
+        PrimaryKey: "ProductID"
+      },
+      {
+        TableName: "Customers",
+        PrimaryKey: "CustomerID"
+      },
+      {
+        TableName: "Departments",
+        PrimaryKey: "DepartmentID"
+      },
+      {
+        TableName: "AuditLog",
+        PrimaryKey: null 
+      }
+    ];
+
+      this.tableCards = tableCards_response;
       } catch (error) {
         console.error("There was an error!", error);
       }
@@ -52,9 +81,10 @@ export default {
 
 <style scoped>
 #tableCards {
-  margin-left: 20vh;
-  width: 100vh;
-  height: 50vh !important;
-  z-index: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center; /* centers the row */
+  margin-top: 20px;
+  padding-left: 20vh; 
 }
 </style>
