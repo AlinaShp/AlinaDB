@@ -1,75 +1,43 @@
 <template>
-  <div
-    class="modal fade"
-    id="backupStaticBackdrop"
-    data-bs-backdrop="static"
-    data-bs-keyboard="false"
-    tabindex="-1"
-    aria-labelledby="staticBackdropLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="staticBackdropLabel">Backup</h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-body">
-          <div class="row">
-            <div class="col">Backup</div>
-            <div class="col">
-              <button class="btn btn-primary" @click="backupButtonClick">Backup</button>
-            </div>
-          </div>
-          <div class="row mt-3">
-            <div class="col">Recovery Mode</div>
-            <div class="col">
-              <div class="dropdown">
-                <button
-                  class="btn btn-secondary dropdown-toggle"
-                  type="button"
-                  id="dropdownMenuButton"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  {{ recoveryMode }}
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <li>
-                    <a class="dropdown-item" href="#" @click="selectRecoveryMode('FULL')">FULL</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#" @click="selectRecoveryMode('SIMPLE')"
-                      >SIMPLE</a
-                    >
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#" @click="selectRecoveryMode('BULK')">BULK</a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div class="col">
-              <button type="button" class="btn btn-secondary" @click="changeRecoveryMode">
-                change
-              </button>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">Restore</div>
-            <div class="col">
-              <button class="btn btn-danger" @click="restoreButtonClick">Restore</button>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
+  <!-- Modal Background -->
+  <div v-if="visible" class="modal-overlay" @click.self="closeModal">
+    <!-- Modal Box -->
+    <div class="modal-box">
+      <h2 class="modal-title">Backup Database</h2>
+      <div class="divider"></div>
+
+      <!-- Database Selector -->
+      <label class="modal-label">Database</label>
+      <select v-model="selectedDatabase" class="modal-input">
+        <option disabled value="">Select a database...</option>
+        <option v-for="db in databases" :key="db">{{ db }}</option>
+      </select>
+
+      <!-- Backup Type Selector -->
+      <label class="modal-label">Backup Type</label>
+      <select v-model="backupType" class="modal-input">
+        <option value="FULL">Full</option>
+        <option value="DIFFERENTIAL">Differential</option>
+        <option value="LOG">Transaction Log</option>
+      </select>
+
+      <!-- Backup Path -->
+      <label class="modal-label">Backup File Path</label>
+      <input type="text" v-model="backupPath" placeholder="C:\\Backups\\" class="modal-input" />
+
+      <!-- File Name -->
+      <label class="modal-label">Backup File Name</label>
+      <input
+        type="text"
+        v-model="backupFile"
+        placeholder="MyDatabaseBackup.bak"
+        class="modal-input"
+      />
+
+      <!-- Actions -->
+      <div class="modal-actions">
+        <button class="btn btn-cancel" @click="closeModal">Cancel</button>
+        <button class="btn btn-run" @click="runBackup">Backup</button>
       </div>
     </div>
   </div>
@@ -77,96 +45,240 @@
 
 <script>
 import Swal from "sweetalert2";
-import { changeRecoveryModel, backupDatabase } from "@/api/DBApi";
+import { backupDatabase, getDBinfo } from "../api/DBApi";
 
 export default {
-  props: {
-    databaseName: {
-      type: String,
-      required: true,
-    },
-  },
+  name: "BackupModal",
   data() {
     return {
-      recoveryMode: "FULL",
+      visible: false,
+      databases: [],
+      selectedDatabase: "",
+      backupType: "FULL",
+      backupPath: "",
+      backupFile: "",
     };
   },
   methods: {
     showModal() {
-      const myModal = new bootstrap.Modal(document.getElementById("backupStaticBackdrop"));
-      myModal.show();
+      this.visible = true;
+      this.loadDatabases();
     },
-    async changeRecoveryMode() {
+    closeModal() {
+      this.visible = false;
+      this.selectedDatabase = "";
+      this.backupType = "FULL";
+      this.backupPath = "";
+      this.backupFile = "";
+    },
+    async loadDatabases() {
+      //TEST
+      this.databases = ["AdventureWorks2022", "master", "ReportDB"];
+      //AXIOS
       try {
+        const response = await getDBinfo(this.instanceName);
 
-        console.log(this.recoveryMode);
-
-        // Оборачиваем recoveryMode в объект и преобразуем в JSON
-        const instanceName = this.$cookies.get('selectedInstance')
-        const response = await changeRecoveryModel(this.databaseName, instanceName);
-
-        console.log(response.data);
-        Swal.fire({
-          icon: "success",
-          title: "Yay!",
-          text: "Recovery mode changed, " + response.data,
-        });
+        // assuming API returns list of DB objects
+        this.databases = response.data.map((db) => db.databaseName);
       } catch (error) {
+        console.error(error);
+
         Swal.fire({
           icon: "error",
-          title: "Oops...",
-          text: "Something went wrong! " + error.message,
+          title: "Failed to load databases",
+          text: "Could not retrieve database list.",
         });
-        console.error("There was an error!", error);
       }
     },
-    selectRecoveryMode(recoveryType) {
-      this.recoveryMode = recoveryType;
-    },
-    async backupButtonClick() {
-      try {
-        const instanceName = this.$cookies.get('selectedInstance')
+    
+    async runBackup() {
+      if (!this.selectedDatabase || !this.backupPath || !this.backupFile) {
+       Swal.fire({
+          icon: "warning",
+          title: "Missing fields",
+          text: "All fields are required."
+        });
 
-        console.log("InstanceName:", instanceName);
-        console.log("DatabaseName:", this.databaseName);
+        return;
+      }
 
-        const response = await backupDatabase(this.databaseName, instanceName);
+      console.log("Simulated Backup:", {
+        database: this.selectedDatabase,
+        type: this.backupType,
+        path: this.backupPath,
+        fileName: this.backupFile,
+      });
+
+       try {
+
+        Swal.fire({
+          title: "Running backup...",
+          text: "Please wait",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        await backupDatabase(
+          this.selectedDatabase,
+          this.instanceName
+        );
 
         Swal.fire({
           icon: "success",
-          title: "Yay!",
-          text: "Backup succeeded, " + response.data,
+          title: "Backup completed",
+          text: `${this.selectedDatabase} backed up successfully`
         });
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Something went wrong! " + error.message,
-        });
-        console.error("There was an error!", error);
-      }
-    },
-    async restoreButtonClick() {
-      try {
-        console.log(this.databaseName);
 
-        const response = await restoreDatabase(this.databaseName);
-        Swal.fire({
-          icon: "success",
-          title: "Yay!",
-          text: "Backup succeeded, " + response.data,
-        });
+        this.closeModal();
+
       } catch (error) {
+
         Swal.fire({
           icon: "error",
-          title: "Oops...",
-          text: "Something went wrong! " + error.message,
+          title: "Backup failed",
+          text: "The database backup could not be completed."
         });
-        console.error("There was an error!", error);
+
+        console.error(error);
+        
       }
+    
+      
     },
   },
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap");
+
+/* Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 40, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+/* Modal Box */
+.modal-box {
+  width: 640px;
+  background: rgba(45, 55, 90, 0.6);
+  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  padding: 28px 30px;
+  border: 1px solid rgba(255, 120, 200, 0.35);
+  box-shadow: 0 0 30px rgba(255, 110, 200, 0.35);
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* Title */
+.modal-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #ff9ce6;
+  text-shadow: 0 0 14px rgba(255, 150, 200, 0.6);
+  margin-bottom: 10px;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, #ff9ce6, transparent);
+  margin-bottom: 18px;
+}
+
+/* Labels */
+.modal-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #ffb5eb;
+}
+
+/* Inputs */
+.modal-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(30, 40, 75, 0.9);
+  border: 1px solid rgba(255, 120, 200, 0.4);
+  color: #f4f4f4;
+  font-size: 15px;
+  margin-bottom: 14px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.modal-input:focus {
+  border-color: #ff9ce6;
+  box-shadow: 0 0 8px rgba(255, 150, 200, 0.6);
+}
+
+/* Actions */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+/* Buttons (UX/UI) */
+.btn {
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s ease;
+}
+
+/* Cancel Button */
+.btn-cancel {
+  background: transparent;
+  border: 1px solid #ff9ce6;
+  color: #ffb5eb;
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 140, 220, 0.15);
+  box-shadow: 0 0 12px rgba(255, 140, 220, 0.5);
+}
+
+/* Backup/Run Button */
+.btn-run {
+  background: linear-gradient(90deg, #ff6ec7, #ff9ce6);
+  color: #2d1f30;
+  box-shadow: 0 0 12px rgba(255, 110, 200, 0.6);
+}
+
+.btn-run:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px rgba(255, 120, 200, 0.85);
+}
+
+.swal-top {
+  z-index: 99999 !important;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+</style>

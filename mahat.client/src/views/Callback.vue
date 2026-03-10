@@ -101,7 +101,7 @@ export default {
 
         console.log(this.recoveryMode);
 
-        // Оборачиваем recoveryMode в объект и преобразуем в JSON
+
         const instanceName = this.$cookies.get('selectedInstance')
         const response = await changeRecoveryModel(this.databaseName, instanceName);
         console.log(response.data);

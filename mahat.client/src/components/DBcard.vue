@@ -1,187 +1,227 @@
 <template>
-    <div class="container">
-     <a class="card2" href="#">
-         <div class="content">
- 
-     <h2>{{card.DatabaseName}}</h2>
-     <div class="line"></div>
-     <p class="small">ID: {{ card.DatabaseId }} </p>
-     <p class="small">RecoveryModel: {{ card.RecoveryModel }} </p>
-     <p class="small">State: {{ card.State }} </p>
-     <p class="small">Compatibility: {{ card.CompatibilityLevel }} </p>
-     <p class="small">Collation: {{ card.Collation }} </p>
-     <button  @click="tableButtonClick" type="button" class="btn btn-outline-light">TABLES</button>
-     <button  @click="backupButtonClick" type="button" class="btn btn-outline-light">BACKUP</button>
- 
-     <div class="go-corner" href="#">
-       <div class="go-arrow">
-         →
-       </div>
-       </div>
-     </div>
-   </a>
-   </div>
- 
-   <BackupModal :databaseName="card.DatabaseName" ref="backupModalComponent"/>
- 
- 
- </template>
- <script>
- import BackupModal from "../components/BackupModal.vue";
- export default {
-   components:{
-     BackupModal
-   },
-   props: {
-     card: {
-       type: Object,
-       required: true
-     },
-     // tableButtonClick: {
-     //   type: Function,
-     //   required: true
-     // },
- 
-   }, methods: {
-     tableButtonClick() {
-       this.$emit('buttonClick');
-     },
-     backupButtonClick(){
-       this.$refs.backupModalComponent.showModal();
-     }
-   }
- }
- </script>
- 
- <style scoped>
- @import url('https://fonts.googleapis.com/css?family=Nunito:400,700');
- 
- 
- * {
-   transition: all 0.3s ease-out;
- }
- 
- html,
- body {
-   height: 100%;
-   font-family: "Nunito", sans-serif;
-   font-size: 16px;
- }
- 
- button{
-   margin-left: 0.5vh;
- }
- .container {
-   width: 100%;
-   height: 100%;
-   display: flex;
-   flex-wrap: wrap;
-   align-items: center;
-   justify-content: center;
- }
- 
- .content {
-   flex-grow: 1; /* Растягивает содержимое, чтобы занять всё доступное пространство слева */
-   padding-right: 20px; /* Отступ справа для разделения от уголка */
- }
- 
- h2 {
-   color: pink;
-   font-size: 30px;
-   line-height: 24px;
-   font-weight: 700;
-   margin-bottom: 4px;
-   opacity: 1 !important;
-   text-align: left; /* Выравнивание текста по левому краю */
- }
- 
- p {
-   font-size: 17px;
-   font-weight: 500;
-   line-height: 20px;
-   color: #f3f3f3;
-   text-align: left; /* Выравнивание текста по левому краю */
-   &.small {
-     font-size: 16px;
-   }
- }
- 
- .line {
-   height: 1px;
-   background-color: #fa9dea; /* Цвет линии */
-   margin: 6px 0 10px; /* Отступы вокруг линии */
- }
- 
- .go-corner {
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   position: absolute;
-   width: 32px;
-   height: 32px;
-   overflow: hidden;
-   top: 0;
-   right: 0;
-   background-color: #fa9dea;
-   border-radius: 0 4px 0 32px;
- }
- 
- .go-arrow {
-   margin-top: -4px;
-   margin-right: -4px;
-   color: white;
-   font-family: courier, sans;
- }
- 
- 
- 
- 
- 
- .card2 {
-   display: block;
-   top: 0px;
-   position: relative;
-   max-width: 262px;
-   background-color: #404d7d;
- 
-   opacity: 0.95;
-   border-radius: 4px;
-   padding: 32px 24px;
-   margin: 12px;
-   text-decoration: none;
-   z-index: 0;
-   overflow: hidden;
-   border: 1px solid #ff59bf9d;
-   width: 30vh; /* Фиксированная ширина */
-   height: 40vh;
- 
-   &:hover {
-     transition: all 0.2s ease-out;
-     box-shadow: 0px 4px 8px rgba(255, 19, 224, 0.2);
-     top: -4px;
-     border: 1px solid #cccccc;
-     background-color: #05317cbe;
-   }
- 
-   &:before {
-     content: "";
-     position: absolute;
-     z-index: -1;
-     top: -16px;
-     right: -16px;
-     background: #f89cf4;
-     height: 32px;
-     width: 32px;
-     border-radius: 32px;
-     transform: scale(2);
-     transform-origin: 50% 50%;
-     transition: transform 0.15s ease-out;
-   }
- 
-   &:hover:before {
-     transform: scale(2.15);
-   }
- }
- 
- 
- </style>
+  <div class="dbcard-wrapper">
+    <div class="dbcard">
+
+      <!-- Delete DB Button -->
+      <button
+        class="delete-btn"
+        title="Delete database"
+        @click="deleteDb"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+          <path d="M10 11v6" />
+          <path d="M14 11v6" />
+          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+        </svg>
+      </button>
+
+      <!-- Title -->
+      <h2 class="db-title">{{ card.DatabaseName }}</h2>
+
+      <div class="divider"></div>
+
+      <div class="info">
+        <div class="info-row">
+          <span class="label">ID:</span>
+          <span class="value">{{ card.DatabaseId }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Recovery Model:</span>
+          <span class="value">{{ card.RecoveryModel }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">State:</span>
+          <span class="value">{{ card.State }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Compatibility:</span>
+          <span class="value">{{ card.CompatibilityLevel }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Collation:</span>
+          <span class="value">{{ card.Collation }}</span>
+        </div>
+      </div>
+
+      <!-- Tables Button -->
+      <button @click="tableButtonClick" class="tables-btn">
+        TABLES →
+      </button>
+
+    </div>
+  </div>
+</template>
+
+<script>
+import Swal from "sweetalert2";
+
+export default {
+  props: {
+    card: {
+      type: Object,
+      required: true,
+    },
+  },
+
+  methods: {
+
+    tableButtonClick() {
+      this.$emit("buttonClick");
+    },
+
+    async deleteDb() {
+
+    const result = await Swal.fire({
+      title: "Delete Database?",
+      text: `Are you sure you want to delete "${this.card.DatabaseName}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it"
+    });
+
+    if (!result.isConfirmed) return;
+
+    this.$emit("delete", this.card);
+  }
+
+  }
+};
+</script>
+
+<style scoped>
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap");
+
+/* Wrapper */
+.dbcard-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Card */
+.dbcard {
+  position: relative;
+  width: 340px;
+  height: 360px;
+  background: rgba(45, 55, 90, 0.55);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  padding: 26px 28px;
+  border: 1px solid rgba(255, 100, 180, 0.4);
+  box-shadow: 0 0 18px rgba(255, 120, 200, 0.25);
+  transition: 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: "Nunito", sans-serif;
+}
+
+.dbcard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 25px rgba(255, 120, 200, 0.55);
+  border-color: #ff8ede;
+  background: rgba(55, 65, 110, 0.65);
+}
+
+/* Delete button */
+.delete-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 110, 200, 0.15);
+  color: #ff9ce6;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  background: rgba(255, 110, 200, 0.35);
+  color: #2d1f2c;
+  box-shadow: 0 0 14px rgba(255, 120, 200, 0.6);
+  transform: scale(1.05);
+}
+
+/* Title */
+.db-title {
+  color: pink;
+  font-size: 1.9em;
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(255, 150, 200, 0.6);
+  text-align: center;
+  margin: 0 0 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  width: 100%;
+  background: #ff9ce6;
+  opacity: 0.6;
+  margin-bottom: 12px;
+}
+
+/* Info */
+.info {
+  flex-grow: 1;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.label {
+  color: #ffb5eb;
+  font-weight: 700;
+}
+
+.value {
+  color: #f3f3f3;
+  font-weight: 400;
+  text-align: right;
+}
+
+/* Tables button */
+.tables-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(90deg, #ff6ec7, #ff9ce6);
+  color: #2d1f2c;
+  font-weight: 700;
+  font-size: 1.15em;
+  cursor: pointer;
+  transition: 0.2s ease;
+  box-shadow: 0 0 10px rgba(255, 110, 200, 0.4);
+}
+
+.tables-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 18px rgba(255, 120, 200, 0.8);
+}
+</style>
