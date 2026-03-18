@@ -25,7 +25,9 @@ namespace Mahat.Server.Models
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var jsonObject = JObject.Load(reader);
-            var isForeignKey = jsonObject["IsForeignKey"]?.ToObject<bool>() ?? false;
+            var isForeignKeyProperty = jsonObject.Properties().
+                FirstOrDefault(p => string.Equals(p.Name, "IsForeignKey", StringComparison.OrdinalIgnoreCase));
+            var isForeignKey = isForeignKeyProperty?.Value.ToObject<bool>() ?? false;
 
             TableCol tableCol = isForeignKey ? new ForeignKeyTableCol() : new TableCol();
 

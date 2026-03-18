@@ -1,13 +1,8 @@
 <template>
   <div class="dbcard-wrapper">
     <div class="dbcard">
-
       <!-- Delete DB Button -->
-      <button
-        class="delete-btn"
-        title="Delete database"
-        @click="deleteDb"
-      >
+      <button class="delete-btn" title="Delete database" @click="deleteDb">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -26,38 +21,35 @@
       </button>
 
       <!-- Title -->
-      <h2 class="db-title">{{ card.DatabaseName }}</h2>
+      <h2 class="db-title">{{ card.databaseName }}</h2>
 
       <div class="divider"></div>
 
       <div class="info">
         <div class="info-row">
           <span class="label">ID:</span>
-          <span class="value">{{ card.DatabaseId }}</span>
+          <span class="value">{{ card.databaseId }}</span>
         </div>
         <div class="info-row">
           <span class="label">Recovery Model:</span>
-          <span class="value">{{ card.RecoveryModel }}</span>
+          <span class="value">{{ card.recoveryModel }}</span>
         </div>
         <div class="info-row">
           <span class="label">State:</span>
-          <span class="value">{{ card.State }}</span>
+          <span class="value">{{ card.state }}</span>
         </div>
         <div class="info-row">
           <span class="label">Compatibility:</span>
-          <span class="value">{{ card.CompatibilityLevel }}</span>
+          <span class="value">{{ card.compatibilityLevel }}</span>
         </div>
         <div class="info-row">
           <span class="label">Collation:</span>
-          <span class="value">{{ card.Collation }}</span>
+          <span class="value">{{ card.collation }}</span>
         </div>
       </div>
 
       <!-- Tables Button -->
-      <button @click="tableButtonClick" class="tables-btn">
-        TABLES →
-      </button>
-
+      <button @click="tableButtonClick(card.databaseName)" class="tables-btn">TABLES →</button>
     </div>
   </div>
 </template>
@@ -74,29 +66,25 @@ export default {
   },
 
   methods: {
-
-    tableButtonClick() {
-      this.$emit("buttonClick");
+    tableButtonClick(dbName) {
+      this.$emit("buttonClick", this.card.databaseName);
     },
 
     async deleteDb() {
+      const result = await Swal.fire({
+        title: "Delete Database?",
+        text: `Are you sure you want to delete "${this.card.DatabaseName}"?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it",
+      });
 
-    const result = await Swal.fire({
-      title: "Delete Database?",
-      text: `Are you sure you want to delete "${this.card.DatabaseName}"?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it"
-    });
-
-    if (!result.isConfirmed) return;
-
-    this.$emit("delete", this.card);
-  }
-
-  }
+      if (!result.isConfirmed) return;
+      this.$emit("delete", this.card);
+    },
+  },
 };
 </script>
 

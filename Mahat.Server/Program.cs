@@ -34,7 +34,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
          builder =>
          {
-             builder.WithOrigins("https://front.mahat.com") 
+             builder.WithOrigins("https://front.mahat.com", "http://localhost:5173") 
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();

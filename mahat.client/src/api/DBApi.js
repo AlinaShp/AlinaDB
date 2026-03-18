@@ -1,6 +1,6 @@
 import axios from "axios";
-//const API_URL = "https://back.mahat.com/api/DB/";.
-const API_URL = "http://localhost:5283/api/DBcontroller/";
+const API_URL = "https://back.mahat.com/api/DB/";
+//const API_URL = "http://localhost:5283/api/db/";
 
 //not used
 const changeRecoveryModel = async (databaseName, instanceName) => {
@@ -17,18 +17,28 @@ const changeRecoveryModel = async (databaseName, instanceName) => {
   return response;
 };
 
-//new request - Add new DB
-const createDatabase = async (instanceName) => {
-  const response = await axios.post(
-    `${API_URL}addDB/${instanceName}`,
+const checkConnection = async (instanceName) => {
+  const response = await axios.get(
+    `${API_URL}checkConnection?instancename=${instanceName}`,
     {
       withCredentials: "true",
       headers: {
         "Content-Type": "application/json",
       },
-      ...payload,
     },
   );
+
+  return response
+}
+
+//new request - Add new DB
+const createDatabase = async (instanceName, payload) => {
+  const response = await axios.post(`${API_URL}addDB/?instancename=${instanceName}`, payload, {
+    withCredentials: "true",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
   return response;
 };
 
@@ -41,7 +51,7 @@ const deleteDatabase = async (databaseName, instanceName) => {
       headers: {
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 
   return response;
@@ -49,22 +59,25 @@ const deleteDatabase = async (databaseName, instanceName) => {
 
 //new request - Execute query
 const executeQuery = async (instanceName, queryText) => {
-  const response = await axios.post(`${API_URL}DBdata?instancename=${instanceName}`,
-    queryText, {
-    withCredentials: "true",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await axios.post(
+    `${API_URL}executeQuery?instancename=${instanceName}`,
+    queryText,
+    {
+      withCredentials: "true",
+      headers: {
+        "Content-Type": "application/json",
+      },
     },
-
-  });
+  );
 
   return response;
 };
 
 //Add backup type, backup file path, backup filename
-const backupDatabase = async (databaseName, instanceName) => {
+const backupDatabase = async (databaseName, instanceName, payload) => {
   const response = await axios.post(
     `${API_URL}backup/${databaseName}?instancename=${instanceName}`,
+    payload,
     {
       withCredentials: "true",
       headers: {
@@ -77,9 +90,10 @@ const backupDatabase = async (databaseName, instanceName) => {
 };
 
 //Add backup filepath, overwrite existing db
-const restoreDatabase = async (databaseName, instanceName) => {
+const restoreDatabase = async (databaseName, instanceName, payload) => {
   const response = await axios.post(
     `${API_URL}restore/${databaseName}?instancename=${instanceName}`,
+    payload,
     {
       withCredentials: "true",
       headers: {
@@ -92,15 +106,12 @@ const restoreDatabase = async (databaseName, instanceName) => {
 };
 
 const getDBinfo = async (instanceName) => {
-  const response = await axios.get(
-    `${API_URL}DBdata?instancename=${instanceName}`,
-    {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const response = await axios.get(`${API_URL}DBinfo?instancename=${instanceName}`, {
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
   return response;
 };
@@ -118,9 +129,9 @@ const tableData = async (databaseName, tableName, instanceName) => {
   return response;
 };
 
-const tablesInfo = async (databaseName, instanceName) => {
+const exsitingBackups = async (databaseName, instanceName, backupType) => {
   const response = await axios.get(
-    `${API_URL}tablesInfo/${databaseName}?instancename=${instanceName}`,
+    `${API_URL}existingBackups/${databaseName}/${backupType}?instancename=${instanceName}`,
     {
       withCredentials: "true",
       headers: {
@@ -131,4 +142,15 @@ const tablesInfo = async (databaseName, instanceName) => {
   return response;
 };
 
-export { createDatabase, deleteDatabase, changeRecoveryModel, backupDatabase, restoreDatabase, getDBinfo, tableData, tablesInfo, executeQuery };
+export {
+  checkConnection,
+  createDatabase,
+  deleteDatabase,
+  changeRecoveryModel,
+  backupDatabase,
+  restoreDatabase,
+  getDBinfo,
+  tableData,
+  executeQuery,
+  exsitingBackups
+};

@@ -1,32 +1,46 @@
 <template>
   <div id="dbComponent">
     <div class="custom-sidebar">
-
       <!-- Logo -->
       <div class="logo">ADB</div>
 
       <!-- Menu -->
       <div class="menu">
-
         <!-- HOME -->
-        <a href="#" @click="goHome">
+        <a href="#" @click="logoff">
           <div class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M3 10.5L12 3l9 7.5V21a.75.75 0 01-.75.75h-5.25V15H9v6.75H3.75A.75.75 0 013 21v-10.5z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="0.1"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21.593 10.943c.584.585.584 1.53 0 2.116L18.71 15.95c-.39.39-1.03.39-1.42 0a.996.996 0 0 1 0-1.41 9.552 9.552 0 0 1 1.689-1.345l.387-.242-.207-.206a10 10 0 0 1-2.24.254H8.998a1 1 0 1 1 0-2h7.921a10 10 0 0 1 2.24.254l.207-.206-.386-.241a9.562 9.562 0 0 1-1.69-1.348.996.996 0 0 1 0-1.41c.39-.39 1.03-.39 1.42 0l2.883 2.893zM14 16a1 1 0 0 0-1 1v1.5a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1.505a1 1 0 1 0 2 0V5.5A2.5 2.5 0 0 0 12.5 3h-7A2.5 2.5 0 0 0 3 5.5v13A2.5 2.5 0 0 0 5.5 21h7a2.5 2.5 0 0 0 2.5-2.5V17a1 1 0 0 0-1-1z"
+              />
             </svg>
           </div>
-          <div class="label">Home</div>
+          <div class="label">Logoff</div>
         </a>
 
         <!-- DATABASES -->
         <a href="#" @click="dbButtonClick">
           <div class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 3c4.418 0 8 .895 8 2v14c0 1.105-3.582 2-8 2s-8-.895-8-2V5c0-1.105 3.582-2 8-2z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 3c4.418 0 8 .895 8 2v14c0 1.105-3.582 2-8 2s-8-.895-8-2V5c0-1.105 3.582-2 8-2z"
+              />
             </svg>
           </div>
           <div class="label">Databases</div>
@@ -35,10 +49,14 @@
         <!-- NEW DB -->
         <a href="#" @click="newDBButtonClick">
           <div class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 4v16m8-8H4" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
           </div>
           <div class="label">New DB</div>
@@ -47,10 +65,18 @@
         <!-- NEW TABLE -->
         <a href="#" @click="newTableButtonClick">
           <div class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 6h16M4 10h16M4 14h16M4 18h16"
+              />
             </svg>
           </div>
           <div class="label">New Table</div>
@@ -59,10 +85,14 @@
         <!-- CUSTOM QUERY -->
         <a href="#" @click="customQueryButtonClick">
           <div class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M4.5 9.75l6 6m0-6l-6 6" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 9.75l6 6m0-6l-6 6" />
             </svg>
           </div>
           <div class="label">Custom Query</div>
@@ -71,10 +101,18 @@
         <!-- BACKUP -->
         <a href="#" @click="BackupQueryButtonClick">
           <div class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 16.5v-12m0 12l-4.5-4.5M12 16.5l4.5-4.5" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 16.5v-12m0 12l-4.5-4.5M12 16.5l4.5-4.5"
+              />
             </svg>
           </div>
           <div class="label">Backup DB</div>
@@ -83,10 +121,18 @@
         <!-- RESTORE -->
         <a href="#" @click="restoreButtonClick">
           <div class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 7.5v12m0-12l-4.5 4.5M12 7.5l4.5 4.5" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 7.5v12m0-12l-4.5 4.5M12 7.5l4.5 4.5"
+              />
             </svg>
           </div>
           <div class="label">Restore DB</div>
@@ -95,12 +141,11 @@
     </div>
 
     <!-- Modals -->
-    <QueryModal ref="modalComponent" />
-    <BackupModal ref="backupModal" />
-    <RestoreModal ref="restoreModal" />
-    <NewDbModal ref="newdbModal" />
-    <NewTableModal ref="newtableModal" />
-    
+    <QueryModal ref="modalComponent" :instanceName="instanceName" />
+    <BackupModal ref="backupModal" :instanceName="instanceName" />
+    <RestoreModal ref="restoreModal" :instanceName="instanceName" />
+    <NewDbModal ref="newdbModal" :instanceName="instanceName" />
+    <NewTableModal ref="newtableModal" :instanceName="instanceName" />
   </div>
 </template>
 
@@ -109,20 +154,42 @@ import QueryModal from "./QueryModal.vue";
 import BackupModal from "./BackupModal.vue";
 import RestoreModal from "./RestoreModal.vue";
 import NewDbModal from "./NewDbModal.vue";
-import NewTableModal from "./NewTableModal.vue";
 
+import NewTableModal from "./NewTableModal.vue";
+import { mapActions } from "vuex";
 
 export default {
+  data() {
+    return {
+      instanceName: this.$cookies.get("selectedInstance"),
+    };
+  },
   components: { QueryModal, BackupModal, RestoreModal, NewDbModal, NewTableModal },
   methods: {
-    goHome() { this.$router.push("/"); },
-    dbButtonClick() { this.$router.push("/DBview"); },
-    customQueryButtonClick() { this.$refs.modalComponent?.showModal(); },
-    BackupQueryButtonClick() { this.$refs.backupModal?.showModal(); },
-    restoreButtonClick() { this.$refs.restoreModal?.showModal(); },
-    newDBButtonClick() { this.$refs.newdbModal?.showModal(); },
-    newTableButtonClick() { this.$refs.newtableModal?.showModal(); },
-  }
+    async logoff() {
+      await this.$store.dispatch("changeUser", "");
+      this.$cookies.remove("selectedInstance");
+      this.$router.push("/");
+    },
+    dbButtonClick() {
+      this.$router.push("/DBview");
+    },
+    customQueryButtonClick() {
+      this.$refs.modalComponent?.showModal();
+    },
+    BackupQueryButtonClick() {
+      this.$refs.backupModal?.showModal();
+    },
+    restoreButtonClick() {
+      this.$refs.restoreModal?.showModal();
+    },
+    newDBButtonClick() {
+      this.$refs.newdbModal?.showModal();
+    },
+    newTableButtonClick() {
+      this.$refs.newtableModal?.showModal();
+    },
+  },
 };
 </script>
 
@@ -144,7 +211,7 @@ export default {
   flex-direction: column;
   align-items: center;
   transition: width 0.35s ease;
-  box-shadow: 0 0 22px rgba(255,110,200,0.35);
+  box-shadow: 0 0 22px rgba(255, 110, 200, 0.35);
   z-index: 100;
   overflow: hidden;
   font-family: "Nunito", sans-serif;
@@ -161,7 +228,7 @@ export default {
   font-weight: 900;
   color: hotpink;
   margin-bottom: 24px;
-  text-shadow: 0 0 10px rgba(255,120,200,0.6);
+  text-shadow: 0 0 10px rgba(255, 120, 200, 0.6);
 }
 
 /* Menu */
@@ -185,17 +252,16 @@ export default {
   color: #f3f3f3;
   transition: 0.25s ease;
   padding: 0; /* no padding when collapsed */
- margin-left: 5vh;
- margin-right: 5vh;
+  margin-left: 5vh;
+  margin-right: 5vh;
 }
 
 /* Hover effect */
 .menu a:hover {
   background: linear-gradient(90deg, #ff6ec7, #ff9ce6);
   color: #2d1f2c;
-  box-shadow: 0 0 16px rgba(255,110,200,0.6);
+  box-shadow: 0 0 16px rgba(255, 110, 200, 0.6);
   transform: translateX(6px);
-  
 }
 
 /* When sidebar is hovered, align icon + label properly */
@@ -250,6 +316,4 @@ export default {
     width: 300px;
   }
 }
-
-
 </style>

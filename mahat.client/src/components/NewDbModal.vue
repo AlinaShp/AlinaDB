@@ -9,49 +9,20 @@
 
       <!-- Database Name -->
       <label class="modal-label">Database Name</label>
-      <input
-        v-model="dbName"
-        placeholder="MyNewDatabase"
-        class="modal-input"
-      />
+      <input v-model="dbName" placeholder="MyNewDatabase" class="modal-input" />
 
       <!-- Collation -->
       <label class="modal-label">Collation</label>
       <select v-model="collation" class="modal-input">
-        <option value="SQL_Latin1_General_CP1_CI_AS">
-          SQL_Latin1_General_CP1_CI_AS (Default)
-        </option>
-        <option value="Latin1_General_100_CI_AS_SC">
-          Latin1_General_100_CI_AS_SC
-        </option>
-        <option value="Hebrew_100_CI_AS">
-          Hebrew_100_CI_AS
-        </option>
+        <option value="SQL_Latin1_General_CP1_CI_AS">SQL_Latin1_General_CP1_CI_AS (Default)</option>
+        <option value="Latin1_General_100_CI_AS_SC">Latin1_General_100_CI_AS_SC</option>
+        <option value="Hebrew_100_CI_AS">Hebrew_100_CI_AS</option>
       </select>
-
-      <!-- Initial Size -->
-      <label class="modal-label">Initial Size (MB)</label>
-      <input
-        type="number"
-        min="10"
-        v-model.number="initialSize"
-        class="modal-input"
-      />
-
-      <!-- Auto Growth -->
-      <div class="checkbox-row">
-        <input type="checkbox" id="autogrowth" v-model="autoGrowth" />
-        <label for="autogrowth">Enable Auto Growth</label>
-      </div>
 
       <!-- Buttons -->
       <div class="modal-actions">
-        <button class="btn btn-cancel" @click="closeModal">
-          Cancel
-        </button>
-        <button class="btn btn-run" @click="createDB">
-          Create
-        </button>
+        <button class="btn btn-cancel" @click="closeModal">Cancel</button>
+        <button class="btn btn-run" @click="createDB">Create</button>
       </div>
     </div>
   </div>
@@ -64,15 +35,13 @@ import { createDatabase } from "../api/DBApi";
 export default {
   name: "NewDbModal",
   props: {
-    instanceName: String
+    instanceName: String,
   },
   data() {
     return {
       visible: false,
       dbName: "",
       collation: "SQL_Latin1_General_CP1_CI_AS",
-      initialSize: 50,
-      autoGrowth: true,
     };
   },
   methods: {
@@ -102,8 +71,6 @@ export default {
       const payload = {
         databaseName: this.dbName,
         collation: this.collation,
-        initialSizeMB: this.initialSize,
-        autoGrowth: this.autoGrowth,
       };
 
       try {
@@ -124,7 +91,6 @@ export default {
         });
 
         this.closeModal();
-
       } catch (error) {
         console.error(error);
         Swal.fire({

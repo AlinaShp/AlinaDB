@@ -23,16 +23,11 @@
 
       <!-- Backup Path -->
       <label class="modal-label">Backup File Path</label>
-      <input type="text" v-model="backupPath" placeholder="C:\\Backups\\" class="modal-input" />
+      <input type="text" v-model="backupPath" placeholder="C:\Backups\" class="modal-input" />
 
       <!-- File Name -->
       <label class="modal-label">Backup File Name</label>
-      <input
-        type="text"
-        v-model="backupFile"
-        placeholder="MyDatabaseBackup.bak"
-        class="modal-input"
-      />
+      <input type="text" v-model="backupFile" placeholder="MyDatabaseBackup" class="modal-input" />
 
       <!-- Actions -->
       <div class="modal-actions">
@@ -49,13 +44,16 @@ import { backupDatabase, getDBinfo } from "../api/DBApi";
 
 export default {
   name: "BackupModal",
+  props: {
+    instanceName: String,
+  },
   data() {
     return {
       visible: false,
       databases: [],
       selectedDatabase: "",
       backupType: "FULL",
-      backupPath: "",
+      backupPath: "C:\\Backups\\",
       backupFile: "",
     };
   },
@@ -90,13 +88,13 @@ export default {
         });
       }
     },
-    
+
     async runBackup() {
       if (!this.selectedDatabase || !this.backupPath || !this.backupFile) {
-       Swal.fire({
+        Swal.fire({
           icon: "warning",
           title: "Missing fields",
-          text: "All fields are required."
+          text: "All fields are required.",
         });
 
         return;
@@ -109,43 +107,40 @@ export default {
         fileName: this.backupFile,
       });
 
-       try {
-
+      try {
         Swal.fire({
           title: "Running backup...",
           text: "Please wait",
           allowOutsideClick: false,
           didOpen: () => {
             Swal.showLoading();
-          }
+          },
         });
+        debugger;
+        const payload = {
+          backupType: this.backupType,
+          filePath: this.backupPath,
+          fileName: this.backupFile,
+        };
 
-        await backupDatabase(
-          this.selectedDatabase,
-          this.instanceName
-        );
+        await backupDatabase(this.selectedDatabase, this.instanceName, payload);
 
         Swal.fire({
           icon: "success",
           title: "Backup completed",
-          text: `${this.selectedDatabase} backed up successfully`
+          text: `${this.selectedDatabase} backed up successfully`,
         });
 
         this.closeModal();
-
       } catch (error) {
-
         Swal.fire({
           icon: "error",
           title: "Backup failed",
-          text: "The database backup could not be completed."
+          text: "The database backup could not be completed.",
         });
 
         console.error(error);
-        
       }
-    
-      
     },
   },
 };

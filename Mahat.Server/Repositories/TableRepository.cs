@@ -16,6 +16,7 @@ namespace Mahat.Server.Repositories
         public void UpdateRow(string instanceName, string databaseName, string tableName, Dictionary<string, object> rowData, string primaryKeyName, object primaryKeyValue);
         public void DeleteRow(string instanceName, string databaseName, string tableName, string primaryKeyName, object primaryKeyValue);
         public bool IsRowExists(string instanceName, string databaseName, string tableName, string primaryKeyName, object primaryKeyValue);
+        public List<TableColDto> GetTableColumns(string instanceName, string databaseName, string tableName);
     }
 
     public class TableRepository : ITableRepository
@@ -94,6 +95,7 @@ namespace Mahat.Server.Repositories
                                 }
                                 tableDataList.Add(rowData);
                             }
+
                         }
                     }
                 }
@@ -318,6 +320,85 @@ namespace Mahat.Server.Repositories
                     }
                 }
             }
+        }
+
+        public List<TableColDto> GetTableColumns(string instanceName, string databaseName, string tableName)
+        {
+            string connectionString = $"Server={instanceName};Database={databaseName};Integrated Security=SSPI;TrustServerCertificate=True;";
+            List<TableColDto> tableColumnList = new List<TableColDto>();
+            string query = $@"
+                              SELECT
+                              c.name AS ColName,
+                              CASE 
+                                  WHEN ty.name IN ('varchar','char','varbinary','binary')
+                                      THEN ty.name + '(' + CAST(c.max_length AS varchar(10)) + ')'
+                                  WHEN ty.name IN ('nvarchar','nchar')
+                                      THEN ty.name + '(' + CAST(c.max_length/2 AS varchar(10)) + ')'
+                                  WHEN ty.name IN ('decimal','numeric')
+                                      THEN ty.name + '(' + CAST(c.precision AS varchar(10)) + ',' + CAST(c.scale AS varchar(10)) + ')'
+                                  ELSE ty.name
+                              END AS DataType,
+                              c.is_identity AS IsIdentity,
+                              c.is_nullable AS IsNullable,
+                              CASE WHEN EXISTS (
+                                  SELECT 1
+                                  FROM sys.indexes i
+                                  JOIN sys.index_columns ic
+                                      ON i.object_id = ic.object_id
+                                      AND i.index_id = ic.index_id
+                                  WHERE i.object_id = c.object_id
+                                  AND ic.column_id = c.column_id
+                                  AND i.is_primary_key = 1
+                              ) THEN 1 ELSE 0 END AS IsPrimaryKey,
+                              CASE WHEN EXISTS (
+                                  SELECT 1
+                                  FROM sys.indexes i
+                                  JOIN sys.index_columns ic
+                                      ON i.object_id = ic.object_id
+                                      AND i.index_id = ic.index_id
+                                  WHERE i.object_id = c.object_id
+                                  AND ic.column_id = c.column_id
+                                  AND i.is_unique = 1
+                                  AND i.is_primary_key = 0
+                              ) THEN 1 ELSE 0 END AS IsUnique
+                              FROM sys.columns c
+                              JOIN sys.types ty
+                                  ON c.user_type_id = ty.user_type_id
+                              WHERE c.object_id = OBJECT_ID('{tableName}');";
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                TableColDto colData = new TableColDto
+                                {
+                                    ColName = reader["ColName"] as string ?? "",
+                                    DataType = reader["DataType"] as string ?? "",
+                                    IsIdentity = Convert.ToBoolean(reader["IsIdentity"]),
+                                    IsNullable = Convert.ToBoolean(reader["IsNullable"]),
+                                    IsPrimaryKey = Convert.ToBoolean(reader["IsPrimaryKey"]),
+                                    IsUnique = Convert.ToBoolean(reader["IsUnique"])
+
+                                };
+                                tableColumnList.Add(colData);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+
+                throw new InvalidOperationException($"Failed to get columns of table '{tableName}' in DB '{databaseName}' on instance '{instanceName}'.", ex);
+            }
+
+            return tableColumnList;
         }
     }
 }

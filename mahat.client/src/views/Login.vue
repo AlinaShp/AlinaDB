@@ -5,7 +5,6 @@
 
     <!-- Login Container -->
     <div class="login-container" ref="loginBox">
-
       <h1 class="title">YolinaDB</h1>
 
       <!-- Instance dropdown -->
@@ -23,55 +22,75 @@
           </button>
 
           <ul class="dropdown-menu instance-menu" aria-labelledby="dropdownMenuButton">
-            <li>
+            <li v-for="instance in availableInstances">
               <a class="dropdown-item"
-                 @click="selectInstance('WIN-6OA5JFTRURC\\SQLEXPRESS')" href="#">
-                WIN-6OA5JFTRURC\SQLEXPRESS
+                 @click="selectInstance(instance)"
+                 href="#">
+                {{instance}}
               </a>
             </li>
           </ul>
         </div>
       </div>
-
       <!-- Sign In Button -->
       <button class="pink-btn" @click="signin">Sign In</button>
-
     </div>
   </div>
 </template>
-
 <script>
-import { mapActions } from "vuex";
- 
-import gsap from "gsap";
-
+  import { mapActions } from "vuex";
+  import { getUser } from "@/api/UserApi.js";
+  import { checkConnection } from "@/api/DBApi"
+  import gsap from "gsap";
+  import Swal from "sweetalert2";
 export default {
   name: "LoginPage",
-
   data() {
     return {
       selectedInstance: "Select Instance",
+      availableInstances: ["WIN-6OA5JFTRURC\\SQLEXPRESS"]
     };
   },
-
   methods: {
     selectInstance(instance) {
       this.$cookies.set("selectedInstance", instance, "1d");
       this.selectedInstance = instance;
     },
-
     async signin() {
       try {
-        // TEST MODE
-        this.$store.dispatch("changeUser", "Administrator");
+        Swal.fire({
+          title: "Trying to connect...",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+        const usernameResponse = await getUser();
+        await this.$store.dispatch("changeUser", usernameResponse.data);
 
+        const response = await checkConnection(this.selectedInstance)
+
+        Swal.fire({
+          icon: "success",
+          title: "Connected",
+          text: response.data,
+          timer: 1500,
+          showConfirmButton: false,
+        });
+       debugger
         this.$router.push("/home");
+
       } catch (err) {
-        console.error("Signin error:", err);
+        const msg = err.response?.data?.message || err.message;
+        Swal.fire({
+          icon: "error",
+          title: "Failed to connect to instance",
+          text: msg,
+        });
       }
     },
   },
-
   mounted() {
     // Animated fade + slide for login window
     gsap.from(this.$refs.loginBox, {
@@ -83,26 +102,23 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 /* Fullscreen wrapper */
 .login-wrapper {
   position: relative;
   width: 100%;
   height: 100vh;
-  background-image: url('/bg.jpg');
+  background-image: url("/bg.jpg");
   background-size: cover;
   background-position: center;
   overflow: hidden;
 }
-
 /* Background blur overlay */
 .bg-blur {
   position: absolute;
   inset: 0;
   backdrop-filter: blur(18px) brightness(0.6);
 }
-
 /* Login card */
 .login-container {
   position: absolute;
@@ -118,7 +134,6 @@ export default {
   backdrop-filter: blur(12px);
   text-align: center;
 }
-
 /* Title */
 .title {
   font-family: "Rubik", sans-serif;
@@ -129,24 +144,19 @@ export default {
   text-align: center;
   width: 100%;
   display: block;
-
   text-shadow: 0 0 18px rgba(255, 140, 200, 0.6);
 }
-
-
 /* Dropdown container */
 .dropdown-box {
   margin-bottom: 30px;
   text-align: left;
 }
-
 .label {
   color: pink;
   font-size: 1.3em;
   margin-bottom: 6px;
   display: block;
 }
-
 /* Instance dropdown button */
 .instance-btn {
   width: 100%;
@@ -159,27 +169,22 @@ export default {
   border-radius: 6px;
   transition: 0.2s ease;
 }
-
 .instance-btn:hover {
   background-color: #3f4c7f !important;
   border-color: #ff8ddd;
 }
-
 /* Dropdown menu styling */
 .instance-menu {
   background: #2e3a62;
   border: 1px solid #ff55c5;
 }
-
 .dropdown-item {
   color: #ffe6fb;
 }
-
 .dropdown-item:hover {
   background: #ff80d0;
   color: white;
 }
-
 /* Sign in button */
 .pink-btn {
   width: 100%;
@@ -195,7 +200,6 @@ export default {
   transition: 0.25s;
   box-shadow: 0 0 12px rgba(255, 100, 180, 0.5);
 }
-
 .pink-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 0 18px rgba(255, 120, 200, 0.8);

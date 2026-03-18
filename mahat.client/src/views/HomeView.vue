@@ -1,30 +1,25 @@
 <template>
-    <div>
-       <DBview></DBview> 
-    </div>
-  </template>
-  
-  <script>
-  import LoginPage from '@/components/LoginPage.vue';
-  import DBview from "./DBview.vue";
-  
-  import { mapActions, mapGetters,  mapState, mapMutations } from 'vuex';
-  
-  export default {
-    name: 'HomeView',
-    components: {
-      LoginPage,
-      DBview
+  <div>
+    <DBview></DBview>
+  </div>
+</template>
+
+<script>
+import DBview from "./DBview.vue";
+import { mapActions, mapGetters, mapState, mapMutations } from "vuex";
+
+export default {
+  name: "HomeView",
+  components: {
+    DBview,
+  },
+
+  computed: {
+    //...mapGetters(['isAuthenticated']),
+    user() {
+      return this.$store.state.user;
     },
-    
-    computed: {
-      //...mapGetters(['isAuthenticated']),
-      user() {
-        return this.$store.state.user;
-      },
-      ...mapState(['themeMode']),
-    },
-  }
-  </script>
-  
-  
+    ...mapState(["themeMode"]),
+  },
+};
+</script>

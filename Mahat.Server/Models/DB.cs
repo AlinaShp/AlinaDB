@@ -8,6 +8,5 @@ namespace Mahat.Server.Models
         public string RecoveryModel { get; set; }
         public int CompatibilityLevel { get; set; }
         public string Collation { get; set; }
-        public List<string> Tables { get; set; }= new List<string>();
     }
 }
