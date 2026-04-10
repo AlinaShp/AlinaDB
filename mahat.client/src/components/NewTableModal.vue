@@ -159,9 +159,6 @@ export default {
     },
 
     async loadDatabases() {
-      // TEST
-
-      // AXIOS
       try {
         const response = await getDBinfo(this.instanceName);
         this.databases = response.data.map((db) => db.databaseName);

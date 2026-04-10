@@ -41,34 +41,6 @@ export default {
   methods: {
     async loadTables() {
       const instanceName = this.$cookies.get("selectedInstance");
-      //TEST
-      //this.tableCards = [
-      //  {
-      //    TableName: "Employees",
-      //    PrimaryKey: "EmployeeID",
-      //  },
-      //  {
-      //    TableName: "Orders",
-      //    PrimaryKey: "OrderID",
-      //  },
-      //  {
-      //    TableName: "Products",
-      //    PrimaryKey: "ProductID",
-      //  },
-      //  {
-      //    TableName: "Customers",
-      //    PrimaryKey: "CustomerID",
-      //  },
-      //  {
-      //    TableName: "Departments",
-      //    PrimaryKey: "DepartmentID",
-      //  },
-      //  {
-      //    TableName: "AuditLog",
-      //    PrimaryKey: null,
-      //  },
-      //];
-      //AXIOS
       try {
         Swal.fire({
           title: "Loading tables...",

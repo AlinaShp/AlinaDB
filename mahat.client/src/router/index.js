@@ -8,7 +8,6 @@ import Table from "../views/Table.vue";
 import { useStore } from "vuex";
 
 const routes = [
-  // { path: '/', component: HomeView, meta: { requiresAuth: true } },
   { path: "/", component: Login, meta: { requiresAuth: true } },
   { path: "/home", component: HomeView },
   { path: "/DBview", component: DBview },

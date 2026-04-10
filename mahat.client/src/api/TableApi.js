@@ -1,6 +1,5 @@
 import axios from "axios";
 const API_URL = "https://back.mahat.com/api/table/";
-//const API_URL = "http://localhost:5283/api/TableController/";
 
 const addTable = async (databaseName, instanceName, payload) => {
   const response = await axios.post(

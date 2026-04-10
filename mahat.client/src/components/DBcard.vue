@@ -39,10 +39,6 @@
           <span class="value">{{ card.state }}</span>
         </div>
         <div class="info-row">
-          <span class="label">Compatibility:</span>
-          <span class="value">{{ card.compatibilityLevel }}</span>
-        </div>
-        <div class="info-row">
           <span class="label">Collation:</span>
           <span class="value">{{ card.collation }}</span>
         </div>

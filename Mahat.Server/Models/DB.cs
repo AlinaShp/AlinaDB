@@ -6,7 +6,6 @@ namespace Mahat.Server.Models
         public int DatabaseId { get; set; }
         public string State { get; set; }
         public string RecoveryModel { get; set; }
-        public int CompatibilityLevel { get; set; }
         public string Collation { get; set; }
     }
 }

@@ -70,13 +70,10 @@ export default {
       this.backupFile = "";
     },
     async loadDatabases() {
-      //TEST
-      this.databases = ["AdventureWorks2022", "master", "ReportDB"];
-      //AXIOS
+
       try {
         const response = await getDBinfo(this.instanceName);
 
-        // assuming API returns list of DB objects
         this.databases = response.data.map((db) => db.databaseName);
       } catch (error) {
         console.error(error);

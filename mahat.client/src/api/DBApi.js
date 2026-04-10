@@ -1,21 +1,5 @@
 import axios from "axios";
 const API_URL = "https://back.mahat.com/api/DB/";
-//const API_URL = "http://localhost:5283/api/db/";
-
-//not used
-const changeRecoveryModel = async (databaseName, instanceName) => {
-  const response = await axios.patch(
-    `${API_URL}changeRecoveryModel/${databaseName}?instancename=${instanceName}`,
-    {
-      withCredentials: "true",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    },
-  );
-
-  return response;
-};
 
 const checkConnection = async (instanceName) => {
   const response = await axios.get(

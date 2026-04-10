@@ -77,7 +77,6 @@ export default {
           showConfirmButton: false,
         });
 
-        // Refresh database list
         await this.getDBinfo();
       } catch (error) {
         console.error(error);
@@ -93,51 +92,7 @@ export default {
     },
 
     async getDBinfo() {
-      // TEST
-      //this.cards = [
-      //  {
-      //    DatabaseName: "AdventureWorks2022",
-      //    DatabaseId: 1,
-      //    RecoveryModel: "Full",
-      //    State: "Online",
-      //    CompatibilityLevel: 150,
-      //    Collation: "SQL_Latin1_General_CP1_CI_AS",
-      //  },
-      //  {
-      //    DatabaseName: "master",
-      //    DatabaseId: 2,
-      //    RecoveryModel: "Simple",
-      //    State: "Online",
-      //    CompatibilityLevel: 160,
-      //    Collation: "SQL_Latin1_General_CP1_CI_AS",
-      //  },
-      //  {
-      //    DatabaseName: "ReportDB",
-      //    DatabaseId: 3,
-      //    RecoveryModel: "BulkLogged",
-      //    State: "Restoring",
-      //    CompatibilityLevel: 140,
-      //    Collation: "Hebrew_CI_AS",
-      //  },
-      //  {
-      //    DatabaseName: "testDB",
-      //    DatabaseId: 4,
-      //    RecoveryModel: "Full",
-      //    State: "Online",
-      //    CompatibilityLevel: 150,
-      //    Collation: "SQL_Latin1_General_CP1_CI_AS",
-      //  },
-      //  {
-      //    DatabaseName: "AnalyticsDB",
-      //    DatabaseId: 5,
-      //    RecoveryModel: "Simple",
-      //    State: "Online",
-      //    CompatibilityLevel: 160,
-      //    Collation: "SQL_Latin1_General_CP1_CI_AS",
-      //  },
-      //];
 
-      //AXIOS
       try {
         const instanceName = this.$cookies.get("selectedInstance");
         Swal.fire({

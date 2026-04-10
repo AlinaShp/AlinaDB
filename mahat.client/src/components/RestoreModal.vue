@@ -81,9 +81,6 @@ export default {
       this.backups= []  ;
     },
     async loadDatabases() {
-      // TEST
-      this.databases = ["AdventureWorks2022", "master", "ReportDB"];
-      // AXIOS
       try {
         const response = await getDBinfo(this.instanceName);
 

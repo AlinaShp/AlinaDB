@@ -85,7 +85,6 @@ export default {
           title: "Query executed successfully",
         });
 
-        //this.closeModal();
       } catch (error) {
         console.error(error);
 

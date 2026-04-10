@@ -76,7 +76,6 @@ namespace Mahat.Server.Repositories
                                     DatabaseId = reader["database_id"] as int? ?? 0,
                                     State = reader["state_desc"] as string ?? "",
                                     RecoveryModel = reader["recovery_model_desc"] as string ?? "",
-                                    CompatibilityLevel = reader["compatibility_level"] as int? ?? 0,
                                     Collation = reader["collation_name"] as string ?? "",
                                 };
 

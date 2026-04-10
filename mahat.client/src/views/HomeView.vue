@@ -15,7 +15,6 @@ export default {
   },
 
   computed: {
-    //...mapGetters(['isAuthenticated']),
     user() {
       return this.$store.state.user;
     },

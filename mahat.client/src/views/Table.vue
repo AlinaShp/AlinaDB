@@ -175,14 +175,6 @@ export default {
     };
   },
   mounted() {
-    //TEST
-    //this.tableData = [
-    //  { Id: 1, Name: "Product A", Price: 29.99, InStock: true },
-    //  { Id: 2, Name: "Product B", Price: 14.5, InStock: false },
-    //];
-    //this.tableHeaders = Object.keys(this.tableData[0]);
-
-    //AXIOS
     this.fetchTableData();
   },
   methods: {
@@ -201,7 +193,7 @@ export default {
         this.tableHeaders = this.columns.map((col) => col.colName);
         this.primaryKeyColumn = this.columns.find((col) => col.isPrimaryKey === true);
 
-        // Fetch table data from API
+
         const response = await getTableData(this.databaseName, this.tableName, instanceName);
 
         this.tableData = response.data || [];
