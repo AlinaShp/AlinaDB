@@ -130,7 +130,6 @@ export {
   checkConnection,
   createDatabase,
   deleteDatabase,
-  changeRecoveryModel,
   backupDatabase,
   restoreDatabase,
   getDBinfo,

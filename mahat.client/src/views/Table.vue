@@ -250,8 +250,10 @@ export default {
     async saveRow(i) {
       try {
         const instanceName = this.$cookies.get("selectedInstance");
-        const row = this.editableRow;
         const primaryKeyName = this.primaryKeyColumn.colName;
+        const row = this.editableRow
+        const rowNoPrime = { ...row }
+        delete rowNoPrime[primaryKeyName]
         const primaryKeyValue = row[primaryKeyName];
 
         await updateRow(
@@ -260,7 +262,7 @@ export default {
           instanceName,
           primaryKeyName,
           primaryKeyValue,
-          row,
+          rowNoPrime,
         );
 
         Swal.fire({
