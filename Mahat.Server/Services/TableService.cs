@@ -14,6 +14,7 @@ namespace Mahat.Server.Services
     {
         public List<TableDto> GetAllTablesData(string instanceName, string databaseName, WindowsIdentity user);
         public List<Dictionary<string, object>> GetTableData(string instanceName, string databaseName, string tableName, WindowsIdentity user);
+        public List<TableColDto> GetTableColumns(string instanceName, string databaseName, string tableName, WindowsIdentity user);
         public void AddTable(string instanceName, string databaseName, Table newTable, WindowsIdentity user);
         public void DropTable(string instanceName, string databaseName, string tableName, WindowsIdentity user);
         public bool IsTableExists(string instanceName, string databaseName, string tableName, WindowsIdentity user);
@@ -52,6 +53,12 @@ namespace Mahat.Server.Services
 
         public List<Dictionary<string, object>> GetTableData(string instanceName, string databaseName, string tableName, WindowsIdentity user)
         {
+            if (!IsTableExists(instanceName, databaseName, tableName, user))
+            {
+
+                throw new KeyNotFoundException($"Table '{tableName}' does not exist in database '{databaseName}' on instance '{instanceName}'.");
+            }
+            
             List<Dictionary<string, object>> tableDataList = new List<Dictionary<string, object>>();
 
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -75,6 +82,39 @@ namespace Mahat.Server.Services
                 throw new KeyNotFoundException($"No data found in table '{tableName}' in DB '{databaseName}' on instance '{instanceName}'.");
             }
         }
+
+        public List<TableColDto> GetTableColumns(string instanceName, string databaseName, string tableName, WindowsIdentity user)
+        {
+            if (!IsTableExists(instanceName, databaseName, tableName, user))
+            {
+
+                throw new KeyNotFoundException($"Table '{tableName}' does not exist in database '{databaseName}' on instance '{instanceName}'.");
+            }
+
+            List<TableColDto> tableDataList = new List<TableColDto>();
+
+#pragma warning disable CA1416 // Validate platform compatibility
+#pragma warning disable CA1416 // Validate platform compatibility
+            WindowsIdentity.RunImpersonated(user.AccessToken, () =>
+            {
+                tableDataList = _tableRepository.GetTableColumns(instanceName, databaseName, tableName);
+            });
+#pragma warning restore CA1416 // Validate platform compatibility
+#pragma warning restore CA1416 // Validate platform compatibility
+
+
+            if (tableDataList.Count > 0)
+            {
+
+                return tableDataList;
+            }
+            else
+            {
+
+                throw new KeyNotFoundException($"No columns found in table '{tableName}' in DB '{databaseName}' on instance '{instanceName}'.");
+            }
+        }
+
 
         public void AddTable(string instanceName, string databaseName, Table newTable, WindowsIdentity user)
         {

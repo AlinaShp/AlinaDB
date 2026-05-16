@@ -1,319 +1,319 @@
 <template>
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
-      </head>
-      <div id="dbComponent">
-        <div class="row">
-        <div class="custom-sidebar col-1">
-    
-          <div class="sidebar-btn">
+  <div id="dbComponent">
+    <div class="custom-sidebar">
+      <!-- Logo -->
+      <div class="logo">ADB</div>
+
+      <!-- Menu -->
+      <div class="menu">
+        <!-- HOME -->
+        <a href="#" @click="logoff">
+          <div class="icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              stroke-width="0.1"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21.593 10.943c.584.585.584 1.53 0 2.116L18.71 15.95c-.39.39-1.03.39-1.42 0a.996.996 0 0 1 0-1.41 9.552 9.552 0 0 1 1.689-1.345l.387-.242-.207-.206a10 10 0 0 1-2.24.254H8.998a1 1 0 1 1 0-2h7.921a10 10 0 0 1 2.24.254l.207-.206-.386-.241a9.562 9.562 0 0 1-1.69-1.348.996.996 0 0 1 0-1.41c.39-.39 1.03-.39 1.42 0l2.883 2.893zM14 16a1 1 0 0 0-1 1v1.5a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1.505a1 1 0 1 0 2 0V5.5A2.5 2.5 0 0 0 12.5 3h-7A2.5 2.5 0 0 0 3 5.5v13A2.5 2.5 0 0 0 5.5 21h7a2.5 2.5 0 0 0 2.5-2.5V17a1 1 0 0 0-1-1z"
+              />
+            </svg>
+          </div>
+          <div class="label">Logoff</div>
+        </a>
+
+        <!-- DATABASES -->
+        <a href="#" @click="dbButtonClick">
+          <div class="icon">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               stroke-width="1.5"
               stroke="currentColor"
-              class="w-6 h-6"
             >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                d="M12 3c4.418 0 8 .895 8 2v14c0 1.105-3.582 2-8 2s-8-.895-8-2V5c0-1.105 3.582-2 8-2z"
               />
             </svg>
           </div>
-          
-          <div class="logo">ADB</div>
-    
-          <div class="menu">
-            <div class="menu-title">Menu</div>
-    
-            <a href="#" @click="dbButtonClick">
-              <div class="icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-                  />
-                </svg>
-              </div>
-              <div class="label">Databases</div>
-            </a>
-    
-            <a href="#" @click="customQueryButtonClick">
-              <div class="icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
-                  />
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-              </div>
-              <div class="label">Custom Query</div>
-            </a>
-    
-            <a href="#">
-              <div class="icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"
-                  />
-                </svg>
-              </div>
-              <div class="label">Courses</div>
-            </a>
-    
-            <a href="#">
-              <div class="icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
-                  />
-                </svg>
-              </div>
-              <div class="label">Downloads</div>
-            </a>
+          <div class="label">Databases</div>
+        </a>
+
+        <!-- NEW DB -->
+        <a href="#" @click="newDBButtonClick">
+          <div class="icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
           </div>
-    
-          <div class="menu">
-            <div class="menu-title">Links</div>
-            <a href="#">
-              <div class="icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
-                  />
-                </svg>
-              </div>
-              <div class="label">Notifications</div>
-            </a>
-    
-            <a href="#">
-              <div class="icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="w-6 h-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
-                  />
-                </svg>
-              </div>
-              <div class="label">Statistics</div>
-            </a>
+          <div class="label">New DB</div>
+        </a>
+
+        <!-- NEW TABLE -->
+        <a href="#" @click="newTableButtonClick">
+          <div class="icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 6h16M4 10h16M4 14h16M4 18h16"
+              />
+            </svg>
           </div>
-        </div>
-    </div>
+          <div class="label">New Table</div>
+        </a>
+
+        <!-- CUSTOM QUERY -->
+        <a href="#" @click="customQueryButtonClick">
+          <div class="icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 9.75l6 6m0-6l-6 6" />
+            </svg>
+          </div>
+          <div class="label">Custom Query</div>
+        </a>
+
+        <!-- BACKUP -->
+        <a href="#" @click="BackupQueryButtonClick">
+          <div class="icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 16.5v-12m0 12l-4.5-4.5M12 16.5l4.5-4.5"
+              />
+            </svg>
+          </div>
+          <div class="label">Backup DB</div>
+        </a>
+
+        <!-- RESTORE -->
+        <a href="#" @click="restoreButtonClick">
+          <div class="icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 7.5v12m0-12l-4.5 4.5M12 7.5l4.5 4.5"
+              />
+            </svg>
+          </div>
+          <div class="label">Restore DB</div>
+        </a>
       </div>
-      <QueryModal ref="modalComponent" />
-    </template>
-    <script>
-    import QueryModal from "./QueryModal.vue";
-    export default {
-        components: {
-            QueryModal
-        },
-        methods:{
-          dbButtonClick(){
-             this.$router.push('/DBview')
-          },
-      customQueryButtonClick(){
-      console.log("triggered");
-      this.$refs.modalComponent.showModal();
-        },
-    }
-    }
-    </script>
-    <style scoped>
-    .col-6{
-        width: 37%;
-    }
-    .custom-sidebar .menu svg {
-      height: 30px;
-      color: pink;
-    }
-    
-    .custom-sidebar {
-      z-index: 1;
-      position: fixed;
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
-      font-family: "Roboto", sans-serif;
-      width: 80px;
-      top: 24px;
-      left: 24px;
-      border-radius: 10px;
-      box-shadow: 0 8px 32px rgba(140, 42, 185, 0.4);
-      overflow: hidden;
-      color: #2a1e0d;
-      transition: all 400ms cubic-bezier(0.07, 0.88, 0.37, 1.05);
-      width: 10vh;
-      height: 80vh;
-    }
-    
-    .custom-sidebar .label {
-      opacity: 0;
-      pointer-events: none;
-      transform: translateX(-20px);
-      transition: all 600ms ease;
-    }
-    
-    .custom-sidebar:hover .label {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateX(0);
-    }
-    
-    .custom-sidebar:hover {
-      width: 300px;
-    }
-    
-    .custom-sidebar:hover .menu a {
-      margin: 0 24px;
-    }
-    
-    .custom-sidebar:hover .menu-title {
-      padding: 0 32px;
-    }
-    
-    .custom-sidebar .menu a {
-      color: pink;
-    }
-    
-    .custom-sidebar .logo {
-      font-size: 20px;
-      font-weight: 900;
-      
-      color: hotpink;
-    }
-    
-    .custom-sidebar .menu {
-      border-top: 1px solid rgba(13, 27, 42, 0.3);
-      padding: 16px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    .custom-sidebar .menu-title {
-      font-size: 14px;
-      color: pink;
-      text-transform: uppercase;
-      margin: 8px 0;
-      transition: all 400ms ease;
-    }
-    
-    .custom-sidebar .menu a {
-      display: flex;
-      gap: 24px;
-      align-items: center;
-      text-decoration: none;
-      padding: 1.5vh;
-      border-radius: 10px;
-      transition: all 500ms ease;
-    }
-    
-    .custom-sidebar .menu a:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-    
-    .custom-sidebar .sidebar-btn {
-      position: absolute;
-      width: 26px;
-      top: 50%;
-      transform: translateY(-50%);
-      right: -26px;
-      background: #0d1b2a;
-      color: #fff;
-      display: flex;
-      padding: 8px 0;
-      border-radius: 0 4px 4px 0;
-      cursor: pointer;
-    }
-    
-    @media (max-width: 600px) {
-      .custom-sidebar {
-        overflow: visible;
-        width: 300px;
-        transform: translateX(-100%);
-        left: 0;
-      }
-    
-      .custom-sidebar.active {
-        transform: translateX(0);
-      }
-    
-      .custom-sidebar .label {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    
-      .custom-sidebar .logo {
-        border-radius: 10px 10px 0 0;
-      }
-    
-      .custom-sidebar:hover .menu-title {
-        padding: 0 20px;
-      }
-    
-      .custom-sidebar .menu a {
-        margin: 0 24px;
-      }
-    }
-    </style>
+    </div>
+
+    <!-- Modals -->
+    <QueryModal ref="modalComponent" :instanceName="instanceName" />
+    <BackupModal ref="backupModal" :instanceName="instanceName" />
+    <RestoreModal ref="restoreModal" :instanceName="instanceName" />
+    <NewDbModal ref="newdbModal" :instanceName="instanceName" />
+    <NewTableModal ref="newtableModal" :instanceName="instanceName" />
+  </div>
+</template>
+
+<script>
+import QueryModal from "./QueryModal.vue";
+import BackupModal from "./BackupModal.vue";
+import RestoreModal from "./RestoreModal.vue";
+import NewDbModal from "./NewDbModal.vue";
+
+import NewTableModal from "./NewTableModal.vue";
+import { mapActions } from "vuex";
+
+export default {
+  data() {
+    return {
+      instanceName: this.$cookies.get("selectedInstance"),
+    };
+  },
+  components: { QueryModal, BackupModal, RestoreModal, NewDbModal, NewTableModal },
+  methods: {
+    async logoff() {
+      await this.$store.dispatch("changeUser", "");
+      this.$cookies.remove("selectedInstance");
+      this.$router.push("/");
+    },
+    dbButtonClick() {
+      this.$router.push("/DBview");
+    },
+    customQueryButtonClick() {
+      this.$refs.modalComponent?.showModal();
+    },
+    BackupQueryButtonClick() {
+      this.$refs.backupModal?.showModal();
+    },
+    restoreButtonClick() {
+      this.$refs.restoreModal?.showModal();
+    },
+    newDBButtonClick() {
+      this.$refs.newdbModal?.showModal();
+    },
+    newTableButtonClick() {
+      this.$refs.newtableModal?.showModal();
+    },
+  },
+};
+</script>
+
+<style scoped>
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap");
+
+/* Sidebar container */
+.custom-sidebar {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  width: 90px; /* collapsed width */
+  height: calc(100vh - 48px);
+  background: rgba(45, 55, 90, 0.6);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: width 0.35s ease;
+  box-shadow: 0 0 22px rgba(255, 110, 200, 0.35);
+  z-index: 100;
+  overflow: hidden;
+  font-family: "Nunito", sans-serif;
+}
+
+/* Expand on hover */
+.custom-sidebar:hover {
+  width: 50vh;
+}
+
+/* Logo */
+.logo {
+  font-size: 1.8em;
+  font-weight: 900;
+  color: hotpink;
+  margin-bottom: 24px;
+  text-shadow: 0 0 10px rgba(255, 120, 200, 0.6);
+}
+
+/* Menu */
+.menu {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+}
+
+/* Menu item */
+.menu a {
+  width: 38vh;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #f3f3f3;
+  transition: 0.25s ease;
+  padding: 0; /* no padding when collapsed */
+  margin-left: 5vh;
+  margin-right: 5vh;
+}
+
+/* Hover effect */
+.menu a:hover {
+  background: linear-gradient(90deg, #ff6ec7, #ff9ce6);
+  color: #2d1f2c;
+  box-shadow: 0 0 16px rgba(255, 110, 200, 0.6);
+  transform: translateX(6px);
+}
+
+/* When sidebar is hovered, align icon + label properly */
+.custom-sidebar:hover .menu a {
+  justify-content: flex-start; /* align left */
+  padding: 0 16px; /* restore horizontal padding */
+}
+
+/* Icon container */
+.icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon svg {
+  width: 26px;
+  height: 26px;
+  transition: transform 0.25s ease;
+}
+
+.menu a:hover .icon svg {
+  transform: scale(1.15);
+}
+
+/* Labels */
+.label {
+  opacity: 0;
+  white-space: nowrap;
+  font-weight: 700;
+  transition: opacity 0.3s ease;
+}
+
+.custom-sidebar:hover .label {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .custom-sidebar {
+    width: 300px;
+    height: auto;
+    left: 0;
+    transform: translateX(-100%);
+  }
+  .custom-sidebar.active {
+    transform: translateX(0);
+  }
+  .custom-sidebar:hover {
+    width: 300px;
+  }
+}
+</style>

@@ -23,6 +23,7 @@ using System.Text;
 using Mahat.Server.Services;
 using Azure;
 using Mahat.Server.DTOs;
+using Mahat.Server.Enums;
 namespace Mahat.Server.Controllers
 {
     [Route("api/[controller]")]
@@ -63,8 +64,8 @@ namespace Mahat.Server.Controllers
 
         [HttpGet]
         [Authorize]
-        [Route("DBdata")]
-        public ActionResult<List<DB>> DBdata(string instanceName)
+        [Route("DBinfo")]
+        public ActionResult<List<DB>> DBinfo(string instanceName)
         {
 
             if (string.IsNullOrEmpty(instanceName))
@@ -143,7 +144,7 @@ namespace Mahat.Server.Controllers
         [HttpPost]
         [Authorize]
         [Route("restore/{databaseName}")]
-        public ActionResult<string> RestoreDB(string databaseName, string instanceName)
+        public ActionResult<string> RestoreDB(string databaseName, string instanceName, [FromBody] List<BackupInfo> backupInfo)
         {
 
             if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
@@ -160,7 +161,7 @@ namespace Mahat.Server.Controllers
             try
             {
 #pragma warning disable CS8604 // Possible null reference argument.
-                _dBService.RestoreDB(instanceName, databaseName, user);
+                _dBService.RestoreDB(instanceName, databaseName,backupInfo, user);
 #pragma warning restore CS8604 // Possible null reference argument.
 
                 return Ok("Restore completed successfully.");
@@ -182,12 +183,12 @@ namespace Mahat.Server.Controllers
         [HttpPost]
         [Authorize]
         [Route("backup/{databaseName}")]
-        public ActionResult<string> BackupDB(string databaseName, string instanceName)
+        public ActionResult<string> BackupDB(string databaseName, string instanceName, [FromBody] BackupInfo backupInfo)
         {
 
-            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName) || backupInfo == null || !backupInfo.IsNotNull(backupInfo))
             {
-                return BadRequest("Database name and instance name cannot be null or empty.");
+                return BadRequest("Database name, instance name and backup info cannot be null or empty.");
             }
 
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -199,7 +200,7 @@ namespace Mahat.Server.Controllers
             try
             {
 #pragma warning disable CS8604 // Possible null reference argument.
-                _dBService.BackupDB(instanceName, databaseName, user);
+                _dBService.BackupDB(instanceName, databaseName, backupInfo, user);
 #pragma warning restore CS8604 // Possible null reference argument.
 
                 return Ok("Backup completed successfully.");
@@ -221,13 +222,15 @@ namespace Mahat.Server.Controllers
 
         [HttpPost]
         [Authorize]
-        [Route("addDB/{databaseName}")]
-        public ActionResult<string> AddDB(string databaseName, string instanceName, string collection = "SQL_Latin1_General_CP1_CI_AS")
+        [Route("addDB")]
+        public ActionResult<string> AddDB(string instanceName, [FromBody] DBDto dbDto)
         {
+            string databaseName = dbDto.DatabaseName;
+            string collation = dbDto.Collation;
 
-            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName))
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName) || dbDto == null || !dbDto.IsNotNull(dbDto))
             {
-                return BadRequest("Database name and instance name cannot be null or empty.");
+                return BadRequest("Database name, instance name and DB info cannot be null or empty.");
             }
 
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
@@ -239,7 +242,7 @@ namespace Mahat.Server.Controllers
             try
             {
 #pragma warning disable CS8604 // Possible null reference argument.
-                _dBService.AddDB(instanceName, databaseName, collection, user);
+                _dBService.AddDB(instanceName, databaseName, collation , user);
 #pragma warning restore CS8604 // Possible null reference argument.
 
                 return Ok("DB created successfully.");
@@ -285,6 +288,47 @@ namespace Mahat.Server.Controllers
             {
                 response.ErrorMessage = ex.Message;
                 response.StatusCode = 404;
+            }
+
+            return StatusCode(response.StatusCode, response.ErrorMessage);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("existingBackups/{databaseName}/{backupType}")]
+        public ActionResult<List<string>> ExistingBackups(string instanceName, string databaseName, BackupTypes backupType)
+        {
+
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(instanceName) || !Enum.IsDefined(typeof(BackupTypes), backupType))
+            {
+                return BadRequest("Invalid database name, instance name or backup type.");
+            }
+
+            ApiResponse response = new ApiResponse();
+
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            var user = (WindowsIdentity)HttpContext.User.Identity;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+            try
+            {
+                List<string> backupFiles = new List<string>();
+
+#pragma warning disable CS8604 // Possible null reference argument.
+                backupFiles = _dBService.GetExistingBackups(instanceName, databaseName, backupType, user);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                return Ok(backupFiles);
+            }
+            catch (InvalidOperationException ex)
+            {
+                response.StatusCode = 500;
+                response.ErrorMessage = ex.Message;
+            }
+            catch (KeyNotFoundException ex)
+            {
+                response.StatusCode = 404;
+                response.ErrorMessage = ex.Message;
             }
 
             return StatusCode(response.StatusCode, response.ErrorMessage);
