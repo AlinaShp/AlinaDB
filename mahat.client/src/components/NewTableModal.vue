@@ -1,42 +1,29 @@
 <template>
   <div v-if="visible" class="modal-overlay" @click.self="closeModal">
     <div class="modal-box">
-
       <h2 class="modal-title">Create New Table</h2>
       <div class="divider"></div>
 
       <!-- Database -->
       <label class="modal-label">Database</label>
-      <select v-model="database" class="modal-input">
+      <select v-model="database" class="modal-input" @change="changeDB">
         <option disabled value="">Select database...</option>
-        <option v-for="db in databases" :key="db" :value="db">
-          {{ db }}
+        <option v-for="database in databases" :key="database" :value="database">
+          {{ database }}
         </option>
       </select>
 
       <!-- Table name -->
       <label class="modal-label">Table Name</label>
-      <input
-        v-model="tableName"
-        class="modal-input"
-        placeholder="e.g. Employees"
-      />
+      <input v-model="tableName" class="modal-input" placeholder="e.g. Employees" />
 
       <!-- Columns -->
       <label class="modal-label">Columns</label>
 
-      <div
-        v-for="(col, index) in columns"
-        :key="index"
-        class="column-row"
-      >
-        <input
-          v-model="col.name"
-          class="column-input"
-          placeholder="Column name"
-        />
+      <div v-for="(col, index) in columns" :key="index" class="column-row">
+        <input v-model="col.colName" class="column-input" placeholder="Column name" />
 
-        <select v-model="col.type" class="column-select">
+        <select v-model="col.dataType" class="column-select">
           <option>INT</option>
           <option>VARCHAR(255)</option>
           <option>NVARCHAR(255)</option>
@@ -45,60 +32,105 @@
           <option>BIT</option>
         </select>
 
-        <label class="nullable">
-          <input type="checkbox" v-model="col.nullable" />
+        <label class="checkbox">
+          <input type="checkbox" v-model="col.isNullable" />
           Nullable
         </label>
+        <label class="checkbox">
+          <input type="checkbox" v-model="col.isUnique" />
+          Unique
+        </label>
+        <label class="checkbox" v-if="!col.isPrimaryKey">
+          <input type="checkbox" v-model="col.isForeignKey" />
+          Foriegn Key
+        </label>
+        <label class="checkbox" v-if="!col.isForeignKey">
+          <input type="checkbox" v-model="col.isPrimaryKey" @change="changePrimary(col)" />
+          Primary Key
+        </label>
+        <label class="checkbox" v-if="col.isPrimaryKey">
+          <input type="checkbox" v-model="col.isIdentity" />
+          Identity
+        </label>
+
+        <!-- Table -->
+        <select
+          v-model="col.foreignKeyTableName"
+          class="modal-input-foreign"
+          v-if="col.isForeignKey && database"
+          @change="changeTable(col)"
+        >
+          <option disabled value="">Tables</option>
+          <option v-for="foriegnTable in foriegnTables" :key="foriegnTable" :value="foriegnTable">
+            {{ foriegnTable }}
+          </option>
+        </select>
+
+        <!-- Column -->
+        <select
+          v-model="col.foreignKeyColName"
+          class="modal-input-foreign"
+          v-if="col.foreignKeyTableName && col.isForeignKey && database"
+        >
+          <option disabled value="">Columns</option>
+          <option
+            v-for="foriegnColumn in foriegnColumns"
+            :key="foriegnColumn"
+            :value="foriegnColumn"
+          >
+            {{ foriegnColumn }}
+          </option>
+        </select>
 
         <button class="remove-btn" @click="removeColumn(index)">✕</button>
       </div>
 
-      <button class="add-column-btn" @click="addColumn">
-        + Add Column
-      </button>
+      <button class="add-column-btn" @click="addColumn">+ Add Column</button>
 
       <!-- Actions -->
       <div class="modal-actions">
-        <button class="btn btn-cancel" @click="closeModal">
-          Cancel
-        </button>
-        <button class="btn btn-run" @click="createTable">
-          Create Table
-        </button>
+        <button class="btn btn-cancel" @click="closeModal">Cancel</button>
+        <button class="btn btn-run" @click="createTable">Create Table</button>
       </div>
-
     </div>
   </div>
 </template>
 
-
 <script>
 import Swal from "sweetalert2";
-import { addTable } from "../api/TableApi";
+import { addTable, tablesInfo, getTableColumns } from "../api/TableApi";
 import { getDBinfo } from "../api/DBApi";
 
 export default {
   name: "NewTableModal",
 
   props: {
-    instanceName: String
+    instanceName: String,
   },
 
   data() {
     return {
       visible: false,
-      database: "",
-      tableName: "",
       databases: [],
-
+      foriegnTables: [],
+      foriegnColumns: [],
       columns: [
-        { name: "Id", type: "INT", nullable: false }
-      ]
+        {
+          colName: "Id",
+          dataType: "INT",
+          isNullable: false,
+          isForeignKey: false,
+          isUnique: false,
+          isPrimaryKey: false,
+          isIdentity: false,
+          foreignKeyTableName: "",
+          foreignKeyColName: "",
+        },
+      ],
     };
   },
 
   methods: {
-
     async showModal() {
       this.visible = true;
       await this.loadDatabases();
@@ -108,23 +140,33 @@ export default {
       this.visible = false;
       this.database = "";
       this.tableName = "";
-      this.columns = [{ name: "Id", type: "INT", nullable: false }];
+      this.columns = [
+        {
+          colName: "Id",
+          dataType: "INT",
+          isNullable: false,
+          isForeignKey: false,
+          isUnique: false,
+          isPrimaryKey: false,
+          isIdentity: false,
+          foreignKeyTableName: "",
+          foreignKeyColName: "",
+        },
+      ];
+      this.databases = [];
+      this.foriegnTables = [];
+      this.foriegnColumns = [];
     },
 
     async loadDatabases() {
-      // TEST
-      this.databases = ["AdventureWorks2022", "master", "ReportDB"];
-      // AXIOS
       try {
         const response = await getDBinfo(this.instanceName);
-        this.databases = response.data.map(db => db.databaseName);
-
+        this.databases = response.data.map((db) => db.databaseName);
       } catch (error) {
-
         Swal.fire({
           icon: "error",
           title: "Failed to load databases",
-          text: "Could not retrieve database list."
+          text: "Could not retrieve database list.",
         });
 
         console.error(error);
@@ -133,9 +175,15 @@ export default {
 
     addColumn() {
       this.columns.push({
-        name: "",
-        type: "VARCHAR(255)",
-        nullable: true
+        colName: "",
+        dataType: "VARCHAR(255)",
+        isNullable: false,
+        isForeignKey: false,
+        isUnique: false,
+        isPrimaryKey: false,
+        isIdentity: false,
+        foreignKeyTableName: "",
+        foreignKeyColName: "",
       });
     },
 
@@ -143,74 +191,128 @@ export default {
       this.columns.splice(index, 1);
     },
 
-    async createTable() {
+    changePrimary(col) {
+      this.columns.forEach((column) => {
+        column.isPrimaryKey = false;
+      });
+      col.isPrimaryKey = true;
+    },
 
+    async loadTabales() {
+      try {
+        const response = await tablesInfo(this.database, this.instanceName);
+        this.foriegnTables = response.data.map((db) => db.tableName);
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to load table",
+          text: "Could not retrieve table list.",
+        });
+
+        console.error(error);
+      }
+    },
+
+    async loadColumns(col) {
+      try {
+        debugger;
+        const response = await getTableColumns(
+          this.database,
+          col.foreignKeyTableName,
+          this.instanceName,
+        );
+        this.foriegnColumns = response.data.map((column) => column.colName);
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to load column",
+          text: "Could not retrieve column list.",
+        });
+
+        console.error(error);
+      }
+    },
+
+    async changeDB() {
+      this.columns.forEach((col) => {
+        col.foreignKeyColName = "";
+        col.foreignKeyTableName = "";
+      });
+      this.foriegnColumns = [];
+      this.foriegnTables = [];
+
+      if (this.database) {
+        await this.loadTabales();
+      }
+    },
+
+    async changeTable(col) {
+      col.foreignKeyColName = "";
+      this.foriegnColumns = [];
+
+      if (col.foreignKeyTableName) {
+        await this.loadColumns(col);
+      }
+    },
+
+    async createTable() {
+      debugger;
       if (!this.database || !this.tableName) {
         Swal.fire({
           icon: "warning",
           title: "Missing information",
-          text: "Database and table name are required."
+          text: "Database and table name are required.",
         });
         return;
       }
 
-      if (this.columns.some(c => !c.name)) {
+      if (this.columns.some((c) => !c.colName)) {
         Swal.fire({
           icon: "warning",
           title: "Invalid columns",
-          text: "All columns must have names."
+          text: "All columns must have names.",
         });
         return;
       }
 
       const payload = {
-        table: this.tableName,
-        columns: this.columns
+        tableName: this.tableName,
+        cols: this.columns,
       };
 
       try {
-
         Swal.fire({
           title: "Creating table...",
           allowOutsideClick: false,
           didOpen: () => {
             Swal.showLoading();
-          }
+          },
         });
 
-        await addTable(
-          this.database,
-          this.instanceName,
-          payload
-        );
+        await addTable(this.database, this.instanceName, payload);
 
         Swal.fire({
           icon: "success",
           title: "Table Created",
-          text: `Table "${this.tableName}" created successfully.`
+          text: `Table "${this.tableName}" created successfully.`,
         });
 
         this.closeModal();
-
       } catch (error) {
-
-        const msg =
-          error.response?.data?.message ||
-          error.message;
+        const msg = error.response?.data?.message || error.message;
 
         Swal.fire({
           icon: "error",
           title: "Table creation failed",
-          text: msg
+          text: msg,
         });
 
         console.error(error);
       }
-    }
-  }
+    },
+  },
 };
 </script>
-
 
 <style scoped>
 /* Overlay */
@@ -227,10 +329,10 @@ export default {
 
 /* Modal box (SCROLL FIX HERE) */
 .modal-box {
-  width: 780px;
+  width: 1100px;
   max-width: 95%;
-  max-height: 85vh;              /* LIMIT HEIGHT */
-  overflow-y: auto;              /* ENABLE SCROLL */
+  max-height: 85vh; /* LIMIT HEIGHT */
+  overflow-y: auto; /* ENABLE SCROLL */
   background: rgba(45, 55, 90, 0.65);
   backdrop-filter: blur(12px);
   border-radius: 14px;
@@ -296,11 +398,28 @@ export default {
   border-color: #ff9ce6;
   box-shadow: 0 0 8px rgba(255, 140, 220, 0.7);
 }
+/* Inputs */
+.modal-input-foreign {
+  width: fit-content;
+  background: rgba(25, 35, 65, 0.9);
+  color: white;
+  border: 1px solid rgba(255, 140, 220, 0.45);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  margin-bottom: 14px;
+  outline: none;
+}
+
+.modal-input-foreign:focus {
+  border-color: #ff9ce6;
+  box-shadow: 0 0 8px rgba(255, 140, 220, 0.7);
+}
 
 /* Column rows */
 .column-row {
   display: grid;
-  grid-template-columns: 2fr 2fr 1.2fr auto;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr auto;
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -312,10 +431,11 @@ export default {
   border-radius: 8px;
   padding: 10px;
   color: white;
+  width: fit-content;
 }
 
 /* Nullable checkbox */
-.nullable {
+.checkbox {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -394,5 +514,4 @@ export default {
   transform: translateY(-2px);
   box-shadow: 0 0 24px rgba(255, 160, 230, 0.9);
 }
-
 </style>

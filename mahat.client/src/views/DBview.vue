@@ -12,7 +12,7 @@
         :key="card.DatabaseId"
         :card="card"
         @delete="confirmDeleteDb"
-        @buttonClick="tableButtonClick(card.DatabaseName)"
+        @buttonClick="tableButtonClick"
       />
     </div>
 
@@ -57,9 +57,7 @@ export default {
 
     async confirmDeleteDb(db) {
       const instanceName = this.$cookies.get("selectedInstance");
-
       try {
-
         Swal.fire({
           title: "Deleting database...",
           allowOutsideClick: false,
@@ -69,7 +67,7 @@ export default {
           },
         });
 
-        const response = await deleteDatabase(db.DatabaseName, instanceName);
+        const response = await deleteDatabase(db.databaseName, instanceName);
 
         Swal.fire({
           icon: "success",
@@ -79,15 +77,11 @@ export default {
           showConfirmButton: false,
         });
 
-        // Refresh database list
         await this.getDBinfo();
       } catch (error) {
-
         console.error(error);
 
-        const msg =
-          error.response?.data?.message ||
-          error.message;
+        const msg = error.response?.data?.message || error.message;
 
         Swal.fire({
           icon: "error",
@@ -98,51 +92,7 @@ export default {
     },
 
     async getDBinfo() {
-      // TEST
-      this.cards = [
-        {
-          DatabaseName: "AdventureWorks2022",
-          DatabaseId: 1,
-          RecoveryModel: "Full",
-          State: "Online",
-          CompatibilityLevel: 150,
-          Collation: "SQL_Latin1_General_CP1_CI_AS",
-        },
-        {
-          DatabaseName: "master",
-          DatabaseId: 2,
-          RecoveryModel: "Simple",
-          State: "Online",
-          CompatibilityLevel: 160,
-          Collation: "SQL_Latin1_General_CP1_CI_AS",
-        },
-        {
-          DatabaseName: "ReportDB",
-          DatabaseId: 3,
-          RecoveryModel: "BulkLogged",
-          State: "Restoring",
-          CompatibilityLevel: 140,
-          Collation: "Hebrew_CI_AS",
-        },
-        {
-          DatabaseName: "testDB",
-          DatabaseId: 4,
-          RecoveryModel: "Full",
-          State: "Online",
-          CompatibilityLevel: 150,
-          Collation: "SQL_Latin1_General_CP1_CI_AS",
-        },
-        {
-          DatabaseName: "AnalyticsDB",
-          DatabaseId: 5,
-          RecoveryModel: "Simple",
-          State: "Online",
-          CompatibilityLevel: 160,
-          Collation: "SQL_Latin1_General_CP1_CI_AS",
-        },
-      ];
 
-      //AXIOS
       try {
         const instanceName = this.$cookies.get("selectedInstance");
         Swal.fire({
@@ -157,7 +107,6 @@ export default {
 
         this.cards = response.data;
         Swal.close();
-        
       } catch (error) {
         console.error(error);
 

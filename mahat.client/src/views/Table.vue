@@ -43,13 +43,18 @@
             <td v-for="header in tableHeaders" :key="header">
               <span v-if="editRow !== rowIndex">{{ row[header] }}</span>
               <input v-else v-model="editableRow[header]" class="edit-input" />
+              <input
+                v-if="insertRow === rowIndex"
+                v-model="insertableRow[header]"
+                class="edit-input"
+              />
             </td>
 
             <!-- Actions -->
             <td class="actions-col">
               <!-- EDIT -->
               <button
-                v-if="editRow !== rowIndex"
+                v-if="(editRow !== rowIndex) & (insertRow !== rowIndex)"
                 class="action-btn edit"
                 title="Edit"
                 @click="toggleEdit(rowIndex)"
@@ -91,7 +96,12 @@
               </button>
 
               <!-- DELETE -->
-              <button class="action-btn delete" title="Delete" @click="deleteRow(rowIndex)">
+              <button
+                class="action-btn delete"
+                title="Delete"
+                @click="deleteRow(rowIndex)"
+                v-if="insertRow !== rowIndex"
+              >
                 <!-- Garbage -->
                 <svg viewBox="0 0 24 24">
                   <polyline points="3 6 5 6 21 6" />
@@ -99,6 +109,35 @@
                   <path d="M10 11v6" />
                   <path d="M14 11v6" />
                   <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                </svg>
+              </button>
+
+              <!-- SAVE INSERT -->
+              <button
+                v-if="insertRow === rowIndex"
+                class="action-btn save"
+                title="Save"
+                @click="saveInsertRow(rowIndex)"
+              >
+                <!-- SAVE INSERT  -->
+                <svg viewBox="0 0 24 24">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+              </button>
+
+              <!-- CANCEL INSERT -->
+              <button
+                v-if="insertRow === rowIndex"
+                class="action-btn cancel"
+                title="Cancel"
+                @click="cancelInsert"
+              >
+                <!-- X -->
+                <svg viewBox="0 0 24 24">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             </td>
@@ -112,7 +151,9 @@
 <script>
 import Navbar from "../components/Navbar.vue";
 import Swal from "sweetalert2";
-import { insertRow, updateRow, deleteRow, getTableData } from "@/api/TableApi";
+import { insertRow, updateRow, deleteRow, getTableData, getTableColumns } from "@/api/TableApi";
+
+import TableModalVue from "../components/TableModal.vue";
 
 export default {
   components: { Navbar },
@@ -122,41 +163,40 @@ export default {
   },
   data() {
     return {
+      columns: [],
       tableData: [],
       tableHeaders: [],
+      primaryKeyColumn: null,
       editRow: null,
       editableRow: {},
+      insertRow: null,
+      insertableRow: {},
       loading: true,
     };
   },
   mounted() {
-    //TEST
-    this.tableData = [
-      { Id: 1, Name: "Product A", Price: 29.99, InStock: true },
-      { Id: 2, Name: "Product B", Price: 14.5, InStock: false },
-    ];
-    this.tableHeaders = Object.keys(this.tableData[0]);
-
-    //AXIOS
     this.fetchTableData();
   },
   methods: {
     async fetchTableData() {
       try {
+        debugger;
         this.loading = true;
         const instanceName = this.$cookies.get("selectedInstance");
 
-        // Fetch table data from API
+        const columnResponse = await getTableColumns(
+          this.databaseName,
+          this.tableName,
+          instanceName,
+        );
+        this.columns = columnResponse.data || [];
+        this.tableHeaders = this.columns.map((col) => col.colName);
+        this.primaryKeyColumn = this.columns.find((col) => col.isPrimaryKey === true);
+
+
         const response = await getTableData(this.databaseName, this.tableName, instanceName);
 
         this.tableData = response.data || [];
-
-        // Extract headers dynamically from first row
-        if (this.tableData.length > 0) {
-          this.tableHeaders = Object.keys(this.tableData[0]);
-        } else {
-          this.tableHeaders = [];
-        }
 
         this.loading = false;
       } catch (error) {
@@ -170,27 +210,17 @@ export default {
     },
 
     async addRow() {
-      const row = {};
-      this.tableHeaders.forEach((h) => (row[h] = ""));
-      try {
-        const instanceName = this.$cookies.get("selectedInstance");
-
-        await insertRow(this.databaseName, this.tableName, instanceName, row);
-
-        Swal.fire({
-          icon: "success",
-          title: "Row added",
-          showConfirmButton: false,
-          timer: 1200,
-        });
+      debugger;
+      if (this.insertRow === null) {
+        const row = {};
+        this.tableHeaders.forEach((h) => (row[h] = ""));
 
         this.tableData.push(row);
-        this.toggleEdit(this.tableData.length - 1);
-      } catch (error) {
+        this.toggleInsert(this.tableData.length - 1);
+      } else {
         Swal.fire({
           icon: "error",
-          title: "Failed to add row",
-          text: error.response?.data || error.message,
+          title: "Only one insert at a time",
         });
       }
     },
@@ -200,16 +230,30 @@ export default {
       this.editableRow = { ...this.tableData[i] };
     },
 
+    toggleInsert(i) {
+      this.insertRow = i;
+      this.insertableRow = { ...this.tableData[i] };
+      this.insert = true;
+    },
+
     cancelEdit() {
       this.editRow = null;
       this.editableRow = {};
     },
 
+    cancelInsert() {
+      this.insertRow = null;
+      this.insertableRow = {};
+      this.tableData.pop();
+    },
+
     async saveRow(i) {
       try {
         const instanceName = this.$cookies.get("selectedInstance");
-        const row = this.editableRow;
-        const primaryKeyName = this.tableHeaders[0];
+        const primaryKeyName = this.primaryKeyColumn.colName;
+        const row = this.editableRow
+        const rowNoPrime = { ...row }
+        delete rowNoPrime[primaryKeyName]
         const primaryKeyValue = row[primaryKeyName];
 
         await updateRow(
@@ -218,7 +262,7 @@ export default {
           instanceName,
           primaryKeyName,
           primaryKeyValue,
-          row,
+          rowNoPrime,
         );
 
         Swal.fire({
@@ -239,11 +283,56 @@ export default {
       }
     },
 
+    async saveInsertRow(i) {
+      try {
+        const instanceName = this.$cookies.get("selectedInstance");
+        const row = this.insertableRow;
+        const primaryKeyName = this.primaryKeyColumn.colName;
+
+        debugger;
+        if (
+          (!row[primaryKeyName] && this.primaryKeyColumn.isIdentity) ||
+          (row[primaryKeyName] && !this.primaryKeyColumn.isIdentity)
+        ) {
+          if (this.primaryKeyColumn.isIdentity) {
+            delete row[primaryKeyName];
+          }
+          await insertRow(this.databaseName, this.tableName, instanceName, row);
+
+          Swal.fire({
+            icon: "success",
+            title: "Row inserted",
+            showConfirmButton: false,
+            timer: 1200,
+          });
+
+          this.tableData[i] = { ...row };
+          this.insertRow = null;
+        } else if (!this.primaryKeyColumn.isIdentity) {
+          Swal.fire({
+            icon: "error",
+            title: "Primary key can't be empty",
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Identity must be empty",
+          });
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to insert row",
+          text: error.response?.data || error.message,
+        });
+      }
+    },
+
     async deleteRow(i) {
       try {
         const row = this.tableData[i];
         const instanceName = this.$cookies.get("selectedInstance");
-        const primaryKeyName = this.tableHeaders[0]; // first column is PK
+        const primaryKeyName = this.primaryKeyColumn.colName;
         const primaryKeyValue = row[primaryKeyName];
 
         const result = await Swal.fire({
@@ -355,6 +444,22 @@ export default {
 
 .table-wrapper {
   overflow-x: auto;
+}
+.table-wrapper::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 100, 180, 0.6); /* Color of the scrollbar thumb */
+  border-radius: 4px; /* Rounded corners */
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 100, 180, 0.8); /* Darker color on hover */
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: rgba(45, 55, 90, 0.3); /* Background of the scrollbar track */
 }
 
 .styled-table {

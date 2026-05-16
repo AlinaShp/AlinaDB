@@ -113,6 +113,47 @@ namespace Mahat.Server.Controllers
             return StatusCode(response.StatusCode, response.ErrorMessage);
         }
 
+        [HttpGet]
+        [Authorize]
+        [Route("tableColumns/{databaseName}/{tableName}")]
+        public ActionResult<List<TableColDto>> TableColumns(string databaseName, string tableName, string instanceName)
+        {
+
+            if (string.IsNullOrEmpty(databaseName) || string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(instanceName))
+            {
+                return BadRequest("Database name, table name, and instance name cannot be null or empty.");
+            }
+
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            var user = (WindowsIdentity)HttpContext.User.Identity;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+            ApiResponse response = new ApiResponse();
+
+            try
+            {
+                List<TableColDto> tableColumnList = new List<TableColDto>();
+
+#pragma warning disable CS8604 // Possible null reference argument.
+                tableColumnList = _tableService.GetTableColumns(instanceName, databaseName, tableName, user);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                return Ok(tableColumnList);
+            }
+            catch (InvalidOperationException ex)
+            {
+                response.StatusCode = 500;
+                response.ErrorMessage = ex.Message;
+            }
+            catch (KeyNotFoundException ex)
+            {
+                response.StatusCode = 404;
+                response.ErrorMessage = ex.Message;
+            }
+
+            return StatusCode(response.StatusCode, response.ErrorMessage);
+        }
+
         [HttpPost]
         [Authorize]
         [Route("addTable/{databaseName}")]

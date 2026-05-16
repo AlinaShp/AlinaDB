@@ -98,11 +98,9 @@ export default {
     },
     async changeRecoveryMode() {
       try {
-
         console.log(this.recoveryMode);
 
-
-        const instanceName = this.$cookies.get('selectedInstance')
+        const instanceName = this.$cookies.get("selectedInstance");
         const response = await changeRecoveryModel(this.databaseName, instanceName);
         console.log(response.data);
         Swal.fire({
@@ -126,7 +124,7 @@ export default {
       try {
         console.log("DatabaseName:", this.databaseName);
 
-        const instanceName = this.$cookies.get('selectedInstance')
+        const instanceName = this.$cookies.get("selectedInstance");
         const response = await backupDatabase(this.databaseName, instanceName);
 
         Swal.fire({
@@ -146,7 +144,7 @@ export default {
     async restoreButtonClick() {
       try {
         console.log(this.databaseName);
-        const instanceName = this.$cookies.get('selectedInstance')
+        const instanceName = this.$cookies.get("selectedInstance");
         const response = await restoreDatabase(this.databaseName, instanceName);
         Swal.fire({
           icon: "success",

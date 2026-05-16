@@ -24,7 +24,7 @@
       </button>
 
       <!-- Title -->
-      <h2 class="table-title">{{ tableCard.TableName }}</h2>
+      <h2 class="table-title">{{ tableCard.tableName }}</h2>
 
       <div class="divider"></div>
 
@@ -32,12 +32,12 @@
       <div class="info">
         <div class="info-row">
           <span class="label">Primary Key:</span>
-          <span class="value">{{ tableCard.PrimaryKey || "-" }}</span>
+          <span class="value">{{ tableCard.primaryKey || "-" }}</span>
         </div>
       </div>
 
       <!-- Data button -->
-      <button @click="tableDataButtonClick(tableCard.TableName)" class="data-btn">DATA →</button>
+      <button @click="tableDataButtonClick(tableCard.tableName)" class="data-btn">DATA →</button>
     </div>
   </div>
 </template>
@@ -59,6 +59,7 @@ export default {
 
   methods: {
     tableDataButtonClick(tableName) {
+      debugger;
       this.$router.push({
         path: "/DBview/TablesView/TableData",
         query: { tableName, databaseName: this.databaseName },
@@ -68,7 +69,7 @@ export default {
     async deleteTable() {
       const result = await Swal.fire({
         title: "Delete Table?",
-        text: `Are you sure you want to delete "${this.tableCard.TableName}"?`,
+        text: `Are you sure you want to delete "${this.tableCard.tableName}"?`,
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#d33",
@@ -77,8 +78,8 @@ export default {
       });
 
       if (!result.isConfirmed) return;
-
-      this.$emit("deleteTable", this.tableCard.TableName);
+      debugger;
+      this.$emit("deleteTable", this.tableCard.tableName);
     },
   },
 };
@@ -93,6 +94,7 @@ export default {
   justify-content: center;
   align-items: center;
   margin: 12px;
+  width: 100%;
 }
 
 /* Card */

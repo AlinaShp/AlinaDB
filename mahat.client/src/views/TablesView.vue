@@ -16,9 +16,7 @@
 import TableCard from "../components/TableCard.vue";
 import Navbar from "../components/Navbar.vue";
 import Swal from "sweetalert2";
-import { tablesInfo } from "@/api/DBApi";
-import { deleteTable } from "@/api/TableApi";
-
+import { deleteTable, tablesInfo } from "@/api/TableApi";
 
 export default {
   components: {
@@ -43,34 +41,6 @@ export default {
   methods: {
     async loadTables() {
       const instanceName = this.$cookies.get("selectedInstance");
-      //TEST
-      this.tableCards = [
-        {
-          TableName: "Employees",
-          PrimaryKey: "EmployeeID",
-        },
-        {
-          TableName: "Orders",
-          PrimaryKey: "OrderID",
-        },
-        {
-          TableName: "Products",
-          PrimaryKey: "ProductID",
-        },
-        {
-          TableName: "Customers",
-          PrimaryKey: "CustomerID",
-        },
-        {
-          TableName: "Departments",
-          PrimaryKey: "DepartmentID",
-        },
-        {
-          TableName: "AuditLog",
-          PrimaryKey: null,
-        },
-      ];
-      //AXIOS
       try {
         Swal.fire({
           title: "Loading tables...",
@@ -80,7 +50,6 @@ export default {
             Swal.showLoading();
           },
         });
-
         const response = await tablesInfo(this.dbName, instanceName);
 
         this.tableCards = response.data;
@@ -99,6 +68,7 @@ export default {
       }
     },
     async deleteTable(tableName) {
+      debugger;
       const instanceName = this.$cookies.get("selectedInstance");
 
       try {
@@ -148,7 +118,14 @@ export default {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  align-items: center;
   padding-left: 20vh;
+}
+.col-4 {
+  flex: 0 0 300px; /* Fixed width for each card */
+  height: 200px; /* Fixed height for each card */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

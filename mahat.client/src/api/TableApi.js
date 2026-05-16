@@ -1,6 +1,5 @@
 import axios from "axios";
-// const API_URL = "https://back.mahat.com/api/TableController/";
-const API_URL = "http://localhost:5283/api/TableController/";
+const API_URL = "https://back.mahat.com/api/table/";
 
 const addTable = async (databaseName, instanceName, payload) => {
   const response = await axios.post(
@@ -9,7 +8,7 @@ const addTable = async (databaseName, instanceName, payload) => {
     {
       withCredentials: true,
       headers: { "Content-Type": "application/json" },
-    }
+    },
   );
   return response;
 };
@@ -20,7 +19,7 @@ const deleteTable = async (databaseName, tableName, instanceName) => {
     {
       withCredentials: true,
       headers: { "Content-Type": "application/json" },
-    }
+    },
   );
   return response;
 };
@@ -32,7 +31,7 @@ const insertRow = async (databaseName, tableName, instanceName, rowData) => {
     {
       withCredentials: true,
       headers: { "Content-Type": "application/json" },
-    }
+    },
   );
   return response;
 };
@@ -43,7 +42,7 @@ const updateRow = async (
   instanceName,
   primaryKeyName,
   primaryKeyValue,
-  rowData
+  rowData,
 ) => {
   const response = await axios.patch(
     `${API_URL}updateRow/${databaseName}/${tableName}/${primaryKeyName}/${primaryKeyValue}?instanceName=${instanceName}`,
@@ -51,7 +50,7 @@ const updateRow = async (
     {
       withCredentials: true,
       headers: { "Content-Type": "application/json" },
-    }
+    },
   );
   return response;
 };
@@ -61,23 +60,60 @@ const deleteRow = async (
   tableName,
   instanceName,
   primaryKeyName,
-  primaryKeyValue
+  primaryKeyValue,
 ) => {
   const response = await axios.delete(
     `${API_URL}deleteRow/${databaseName}/${tableName}/${primaryKeyName}/${primaryKeyValue}?instanceName=${instanceName}`,
     {
       withCredentials: true,
       headers: { "Content-Type": "application/json" },
-    }
+    },
   );
   return response;
 };
+
 const getTableData = async (databaseName, tableName, instanceName) => {
-  const response= await axios.get(`${API_URL}tableData/${databaseName}/${tableName}?instanceName=${instanceName}`, {
-    withCredentials: true,
-    headers: { "Content-Type": "application/json" },
-  });
+  const response = await axios.get(
+    `${API_URL}tableData/${databaseName}/${tableName}?instanceName=${instanceName}`,
+    {
+      withCredentials: true,
+      headers: { "Content-Type": "application/json" },
+    },
+  );
   return response;
 };
 
-export { addTable, deleteTable, insertRow, updateRow, deleteRow, getTableData };
+const getTableColumns = async (databaseName, tableName, instanceName) => {
+  const response = await axios.get(
+    `${API_URL}tableColumns/${databaseName}/${tableName}?instanceName=${instanceName}`,
+    {
+      withCredentials: true,
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+  return response;
+};
+
+const tablesInfo = async (databaseName, instanceName) => {
+  const response = await axios.get(
+    `${API_URL}tablesInfo/${databaseName}?instancename=${instanceName}`,
+    {
+      withCredentials: "true",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
+  );
+  return response;
+};
+
+export {
+  addTable,
+  deleteTable,
+  insertRow,
+  updateRow,
+  deleteRow,
+  getTableData,
+  getTableColumns,
+  tablesInfo,
+};
