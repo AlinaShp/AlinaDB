@@ -275,6 +275,15 @@ export default {
         return;
       }
 
+      if (!(this.columns.some((c) => c.isPrimaryKey))) {
+        Swal.fire({
+          icon: "warning",
+          title: "Missing Primary Key",
+          text: "There must be a Primary Key.",
+        });
+        return;
+      }
+
       const payload = {
         tableName: this.tableName,
         cols: this.columns,

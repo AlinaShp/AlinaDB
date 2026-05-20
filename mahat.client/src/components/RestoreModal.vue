@@ -101,7 +101,7 @@ export default {
 
     async runRestore() {
       debugger
-      if (!this.selectedDatabase || this.backups.some((backup) => backup.backupPath === null)) {
+      if (!this.selectedDatabase || this.backups.some((backup) => backup.backupPath === "")) {
         Swal.fire({
           icon: "warning",
           title: "Missing fields",
