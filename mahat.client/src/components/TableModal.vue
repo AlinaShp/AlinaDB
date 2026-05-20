@@ -89,19 +89,19 @@ export default {
 }
 
 /* Modal Card */
-.modal-box {
-  max-height: 80vh;
-  overflow-y: auto;
-  width: fit-content;
-  background: rgba(45, 55, 90, 0.55);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  padding: 28px 30px;
-  border: 1px solid rgba(255, 100, 180, 0.4);
-  box-shadow: 0 0 22px rgba(255, 120, 200, 0.35);
-  transition: 0.25s ease;
-  animation: fadeIn 0.25s ease-out;
-}
+  .modal-box {
+    max-height: 100vh;
+    overflow-y: auto;
+    width: fit-content;
+    background: rgba(45, 55, 90, 0.55);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 28px 30px;
+    border: 1px solid rgba(255, 100, 180, 0.4);
+    box-shadow: 0 0 22px rgba(255, 120, 200, 0.35);
+    transition: 0.25s ease;
+    animation: fadeIn 0.25s ease-out;
+  }
 
 .modal-box:hover {
   box-shadow: 0 0 32px rgba(255, 120, 200, 0.6);
@@ -204,24 +204,22 @@ export default {
     transform: translateY(0);
   }
 }
-.styled-table th,
-.styled-table td {
-  padding: 10px;
-  border-bottom: 1px solid #ffffff20;
-}
-.table-wrapper {
-  max-height: 400px; /* Set a maximum height for the table container */
-  overflow-y: auto; /* Add vertical scrolling if content overflows */
-  overflow-x: auto; /* Add horizontal scrolling if content overflows */
-  margin-bottom: 16px;
-  /* Center the table */
-  display: flex;
-  justify-content: center; /* Center horizontally */
-  align-items: center;
-}
-.table-wrapper::-webkit-scrollbar {
-  width: 8px; /* Width of the scrollbar */
-}
+  .styled-table th,
+  .styled-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ffffff20;
+    width: max-content; /* Adjusts to fit content */
+  }
+  .table-wrapper {
+    max-height: 650px; /* Set a maximum height for the table container */
+    max-width: fit-content; /* Set a maximum width for the table container */
+    overflow-y: auto; /* Add vertical scrolling if content overflows */
+    overflow-x: auto; /* Add horizontal scrolling if content overflows */
+    margin-bottom: 16px;
+  }
+    .table-wrapper::-webkit-scrollbar {
+      width: 8px; /* Width of the scrollbar */
+    }
 
 .table-wrapper::-webkit-scrollbar-thumb {
   background: rgba(255, 100, 180, 0.6); /* Color of the scrollbar thumb */

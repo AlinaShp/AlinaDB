@@ -70,20 +70,39 @@ export default {
             Swal.showLoading();
           },
         });
-        debugger;
         const response = await executeQuery(this.instanceName, this.queryText);
         this.data = response.data.Result;
+        const affectedRows = response.data.RowsAffected;
 
         console.log("Query Response:", this.data);
-
-        if (this.data.length) {
-          this.$refs.tableModal?.showModal();
+        debugger
+        if (affectedRows > 0)
+          if (this.data.length) {
+            Swal.close()
+            this.$refs.tableModal?.showModal();
+          }
+          else {
+            Swal.fire({
+              icon: "success",
+              title: "Query executed successfully",
+              text: `${affectedRows} row(s) affected.`,
+            });
+          }
+        else if (affectedRows === 0) {
+          Swal.fire({
+            icon: "info",
+            title: "Query executed",
+            text: "No data was fuound.",
+          });
         }
 
-        Swal.fire({
-          icon: "success",
-          title: "Query executed successfully",
-        });
+        else if (affectedRows === -1) {
+          Swal.fire({
+            icon: "success",
+            title: "Query executed successfully",
+          });
+        }
+        
 
       } catch (error) {
         console.error(error);

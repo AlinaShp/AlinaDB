@@ -106,19 +106,17 @@ namespace Mahat.Server.Repositories
                     using (SqlCommand command = new SqlCommand(request, con))
                     {
                         con.Open();
-
-                        if (request.TrimStart().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
+                        using (SqlDataReader reader = command.ExecuteReader())
                         {
-                            using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                            if (reader.FieldCount > 0)
                             {
-
-                                adapter.Fill(resultTable);
+                                resultTable.Load(reader);
+                                rowsAffected = resultTable.Rows.Count;
                             }
-                        }
-                        else
-                        {
-
-                            rowsAffected = command.ExecuteNonQuery();
+                            else
+                            {
+                                rowsAffected = reader.RecordsAffected;
+                            }
                         }
 
                         var result = new
