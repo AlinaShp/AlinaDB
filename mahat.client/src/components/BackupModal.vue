@@ -113,7 +113,7 @@ export default {
             Swal.showLoading();
           },
         });
-        debugger;
+
         const payload = {
           backupType: this.backupType,
           filePath: this.backupPath,

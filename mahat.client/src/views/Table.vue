@@ -180,7 +180,6 @@ export default {
   methods: {
     async fetchTableData() {
       try {
-        debugger;
         this.loading = true;
         const instanceName = this.$cookies.get("selectedInstance");
 
@@ -210,7 +209,7 @@ export default {
     },
 
     async addRow() {
-      debugger;
+
       if (this.insertRow === null) {
         const row = {};
         this.tableHeaders.forEach((h) => (row[h] = ""));
@@ -289,7 +288,6 @@ export default {
         const row = this.insertableRow;
         const primaryKeyName = this.primaryKeyColumn.colName;
 
-        debugger;
         if (
           (!row[primaryKeyName] && this.primaryKeyColumn.isIdentity) ||
           (row[primaryKeyName] && !this.primaryKeyColumn.isIdentity)

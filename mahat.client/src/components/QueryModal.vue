@@ -70,7 +70,7 @@ export default {
             Swal.showLoading();
           },
         });
-        debugger;
+
         const response = await executeQuery(this.instanceName, this.queryText);
         this.data = response.data.Result;
 
