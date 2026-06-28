@@ -209,9 +209,9 @@ export default {
     border: 1px solid rgba(255, 140, 220, 0.45);
     box-shadow: 0 0 30px rgba(255, 120, 200, 0.35);
     transition: all 0.25s ease;
-    max-height: 900px; /* Set a maximum height for the table container */
-    overflow-y: auto; /* Add vertical scrolling if content overflows */
-    overflow-x: auto; /* Add horizontal scrolling if content overflows */
+    max-height: 85vh; 
+    overflow-y: auto; 
+    overflow-x: auto; 
     margin-bottom: 16px;
   }
 
