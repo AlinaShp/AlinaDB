@@ -88,8 +88,8 @@ export default {
 
 /* Modal Card */
 .modal-box {
-  max-height: 80vh;
-  overflow-y: auto;
+  max-height: 90vh;
+  overflow-y: clip;
   width: fit-content;
   background: rgba(45, 55, 90, 0.55);
   backdrop-filter: blur(12px);
@@ -208,14 +208,15 @@ export default {
   border-bottom: 1px solid #ffffff20;
 }
 .table-wrapper {
-  max-height: 400px; /* Set a maximum height for the table container */
+  max-height: 60vh; /* Set a maximum height for the table container */
+  max-width: 85vw;
   overflow-y: auto; /* Add vertical scrolling if content overflows */
   overflow-x: auto; /* Add horizontal scrolling if content overflows */
   margin-bottom: 16px;
   /* Center the table */
-  display: flex;
-  justify-content: center; /* Center horizontally */
-  align-items: center;
+  /*display: flex;
+  justify-content: center;*/ /* Center horizontally */
+  /*align-items: center;*/
 }
 .table-wrapper::-webkit-scrollbar {
   width: 8px; /* Width of the scrollbar */
