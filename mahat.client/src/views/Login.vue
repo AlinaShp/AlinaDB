@@ -78,7 +78,7 @@ export default {
           timer: 1500,
           showConfirmButton: false,
         });
-       debugger
+
         this.$router.push("/home");
 
       } catch (err) {

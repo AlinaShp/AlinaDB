@@ -215,7 +215,7 @@ export default {
 
     async loadColumns(col) {
       try {
-        debugger;
+
         const response = await getTableColumns(
           this.database,
           col.foreignKeyTableName,
@@ -256,7 +256,6 @@ export default {
     },
 
     async createTable() {
-      debugger;
       if (!this.database || !this.tableName) {
         Swal.fire({
           icon: "warning",

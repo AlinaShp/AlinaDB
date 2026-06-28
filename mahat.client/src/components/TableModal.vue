@@ -54,7 +54,6 @@ export default {
       immediate: true,
       handler(newData) {
         if (newData && newData.length > 0) {
-          debugger;
           this.tableData = newData;
           this.tableHeaders = Object.keys(newData[0]);
         }
@@ -63,7 +62,6 @@ export default {
   },
   methods: {
     showModal() {
-      debugger;
       this.visible = true;
     },
     closeModal() {

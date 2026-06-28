@@ -59,7 +59,6 @@ export default {
 
   methods: {
     tableDataButtonClick(tableName) {
-      debugger;
       this.$router.push({
         path: "/DBview/TablesView/TableData",
         query: { tableName, databaseName: this.databaseName },
@@ -78,7 +77,6 @@ export default {
       });
 
       if (!result.isConfirmed) return;
-      debugger;
       this.$emit("deleteTable", this.tableCard.tableName);
     },
   },

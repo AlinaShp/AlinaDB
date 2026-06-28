@@ -68,7 +68,6 @@ export default {
       }
     },
     async deleteTable(tableName) {
-      debugger;
       const instanceName = this.$cookies.get("selectedInstance");
 
       try {

@@ -100,7 +100,6 @@ export default {
     },
 
     async runRestore() {
-      debugger
       if (!this.selectedDatabase || this.backups.some((backup) => backup.backupPath === null)) {
         Swal.fire({
           icon: "warning",
@@ -150,7 +149,6 @@ export default {
     },
 
     async loadBackups(backupType, backup) {
-      debugger
       try {
         const response = await exsitingBackups(
           this.selectedDatabase,
